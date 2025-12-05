@@ -60,7 +60,7 @@ export default function ReadingSessionScreen() {
       Alert.alert('Connected', `You are now connected with Mystic Luna (Session ${id})`);
     }, 2000);
     return () => clearTimeout(timer);
-  }, []);
+  }, [id]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   StyleSheet,
   Text,
@@ -6,17 +6,15 @@ import {
   ScrollView,
   FlatList,
   TouchableOpacity,
-  Dimensions,
+  TextInput,
 } from 'react-native';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors } from '@/constants/colors';
-import { MOCK_READERS, MOCK_STREAMS } from '@/mocks/readers';
+import { MOCK_READERS, MOCK_STREAMS, MOCK_PRODUCTS, MOCK_COMMUNITY_HIGHLIGHTS } from '@/mocks/readers';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Header } from '@/components/Header';
-
-const { width } = Dimensions.get('window');
+import { Eye, ShoppingBag, Users, Mail, Star, Heart, MessageCircle, ArrowRight } from 'lucide-react-native';
 
 const BACKGROUND_IMAGE =
   'https://i.postimg.cc/sXdsKGTK/DALL-E-2025-06-06-14-36-29-A-vivid-ethereal-background-image-designed-for-a-psychic-reading-app.webp';
@@ -24,51 +22,108 @@ const HERO_IMAGE = 'https://i.postimg.cc/tRLSgCPb/HERO-IMAGE-1.jpg';
 
 export default function HomeScreen() {
   const router = useRouter();
-  const insets = useSafeAreaInsets();
+  const [email, setEmail] = useState('');
 
   const renderStreamItem = ({ item }: { item: typeof MOCK_STREAMS[0] }) => (
-    <View style={styles.streamItem}>
-      <Image source={{ uri: item.thumbnail }} style={styles.streamThumbnail} />
+    <TouchableOpacity 
+      style={styles.streamItem}
+      onPress={() => router.push('/live')}
+      activeOpacity={0.8}
+    >
+      <Image source={{ uri: item.thumbnail }} style={styles.streamThumbnail} contentFit="cover" />
       <View style={styles.liveBadge}>
         <Text style={styles.liveText}>LIVE</Text>
       </View>
       <LinearGradient
-        colors={['transparent', 'rgba(0,0,0,0.8)']}
+        colors={['transparent', 'rgba(0,0,0,0.9)']}
         style={styles.streamOverlay}>
-        <Text style={styles.streamTitle}>{item.title}</Text>
-        <Text style={styles.streamViewerCount}>{item.viewers} watching</Text>
+        <Text style={styles.streamReaderName}>{item.readerName}</Text>
+        <Text style={styles.streamTitle} numberOfLines={1}>{item.title}</Text>
+        <View style={styles.viewerContainer}>
+          <Eye size={12} color="rgba(255,255,255,0.8)" />
+          <Text style={styles.streamViewerCount}>{item.viewers} watching</Text>
+        </View>
       </LinearGradient>
-    </View>
+    </TouchableOpacity>
   );
 
-  const renderReaderItem = ({ item }: { item: typeof MOCK_READERS[0] }) => (
-    <View style={styles.readerCard}>
-      <View style={styles.readerRow}>
-        <Image source={{ uri: item.avatar }} style={styles.readerAvatar} />
-        <View style={styles.readerInfo}>
-          <Text style={styles.readerName}>{item.name}</Text>
-          <Text style={styles.readerSpecialty}>{item.specialty}</Text>
-          <View style={styles.ratingRow}>
-            <Text style={styles.ratingStar}>★</Text>
-            <Text style={styles.ratingText}>
-              {item.rating} ({item.reviews})
-            </Text>
+  const renderOnlineReaderItem = ({ item }: { item: typeof MOCK_READERS[0] }) => (
+    <TouchableOpacity 
+      style={styles.onlineReaderCard}
+      onPress={() => router.push(`/reading/${item.id}`)}
+      activeOpacity={0.8}
+    >
+      <View style={styles.onlineReaderImageContainer}>
+        <Image source={{ uri: item.avatar }} style={styles.onlineReaderAvatar} contentFit="cover" />
+        <View style={styles.onlineIndicator} />
+      </View>
+      <Text style={styles.onlineReaderName} numberOfLines={1}>{item.name}</Text>
+      <Text style={styles.onlineReaderSpecialty} numberOfLines={1}>{item.specialty}</Text>
+      <View style={styles.onlineReaderRating}>
+        <Star size={10} color="#FFD700" fill="#FFD700" />
+        <Text style={styles.onlineReaderRatingText}>{item.rating}</Text>
+      </View>
+      <Text style={styles.onlineReaderPrice}>${item.pricePerMin}/min</Text>
+    </TouchableOpacity>
+  );
+
+  const renderProductItem = ({ item }: { item: typeof MOCK_PRODUCTS[0] }) => (
+    <TouchableOpacity 
+      style={styles.productCard}
+      onPress={() => router.push('/shop')}
+      activeOpacity={0.8}
+    >
+      <Image source={{ uri: item.image }} style={styles.productImage} contentFit="cover" />
+      <View style={styles.productInfo}>
+        <Text style={styles.productName} numberOfLines={2}>{item.name}</Text>
+        <View style={styles.productMeta}>
+          <Text style={styles.productPrice}>${item.price.toFixed(2)}</Text>
+          <View style={styles.productRating}>
+            <Star size={10} color="#FFD700" fill="#FFD700" />
+            <Text style={styles.productRatingText}>{item.rating}</Text>
           </View>
         </View>
-        <View style={styles.readerAction}>
-          <Text style={styles.priceText}>${item.pricePerMin}/min</Text>
-          <TouchableOpacity 
-            style={styles.chatButton}
-            onPress={() => router.push(`/reading/${item.id}`)}
-          >
-            <Text style={styles.chatButtonText}>Chat</Text>
-          </TouchableOpacity>
-        </View>
       </View>
-      {item.isOnline && (
-        <View style={styles.onlineIndicator} />
-      )}
-    </View>
+    </TouchableOpacity>
+  );
+
+  const renderCommunityItem = ({ item }: { item: typeof MOCK_COMMUNITY_HIGHLIGHTS[0] }) => (
+    <TouchableOpacity 
+      style={styles.communityCard}
+      onPress={() => router.push('/community')}
+      activeOpacity={0.8}
+    >
+      <Image source={{ uri: item.image }} style={styles.communityImage} contentFit="cover" />
+      <LinearGradient
+        colors={['transparent', 'rgba(0,0,0,0.8)']}
+        style={styles.communityOverlay}
+      >
+        <Text style={styles.communityTitle} numberOfLines={2}>{item.title}</Text>
+        <Text style={styles.communityAuthor}>By {item.author}</Text>
+        <View style={styles.communityStats}>
+          <View style={styles.communityStat}>
+            <Heart size={12} color="white" />
+            <Text style={styles.communityStatText}>{item.likes}</Text>
+          </View>
+          <View style={styles.communityStat}>
+            <MessageCircle size={12} color="white" />
+            <Text style={styles.communityStatText}>{item.comments}</Text>
+          </View>
+        </View>
+      </LinearGradient>
+    </TouchableOpacity>
+  );
+
+  const QuickActionButton = ({ icon, label, onPress }: { icon: React.ReactNode, label: string, onPress: () => void }) => (
+    <TouchableOpacity style={styles.quickActionButton} onPress={onPress}>
+      <LinearGradient
+        colors={['rgba(255, 105, 180, 0.2)', 'rgba(255, 105, 180, 0.05)']}
+        style={styles.quickActionIconContainer}
+      >
+        {icon}
+      </LinearGradient>
+      <Text style={styles.quickActionLabel}>{label}</Text>
+    </TouchableOpacity>
   );
 
   return (
@@ -77,6 +132,7 @@ export default function HomeScreen() {
         source={{ uri: BACKGROUND_IMAGE }}
         style={StyleSheet.absoluteFill}
         contentFit="cover"
+        transition={1000}
       />
       <View style={styles.overlay} />
       
@@ -84,7 +140,7 @@ export default function HomeScreen() {
       <Header transparent={true} />
       
       <ScrollView 
-        contentContainerStyle={[styles.scrollContent, { paddingTop: 20 }]}
+        contentContainerStyle={[styles.scrollContent]}
         showsVerticalScrollIndicator={false}
       >
         {/* Hero Section */}
@@ -93,12 +149,56 @@ export default function HomeScreen() {
           <Text style={styles.tagline}>A Community of Gifted Psychics</Text>
         </View>
 
+        {/* Quick Access Buttons */}
+        <View style={styles.quickActionsContainer}>
+          <QuickActionButton 
+            icon={<Eye color={Colors.dark.tint} size={24} />} 
+            label="Readers" 
+            onPress={() => router.push('/readings')} 
+          />
+          <QuickActionButton 
+            icon={<ShoppingBag color={Colors.dark.tint} size={24} />} 
+            label="Shop" 
+            onPress={() => router.push('/shop')} 
+          />
+          <QuickActionButton 
+            icon={<Users color={Colors.dark.tint} size={24} />} 
+            label="Community" 
+            onPress={() => router.push('/community')} 
+          />
+          <QuickActionButton 
+            icon={<Mail color={Colors.dark.tint} size={24} />} 
+            label="Contact" 
+            onPress={() => router.push('/help')} 
+          />
+        </View>
+
+        {/* Online Readers */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Online Readers</Text>
+            <TouchableOpacity onPress={() => router.push('/readings')} style={styles.seeAllButton}>
+              <Text style={styles.seeAllText}>See All</Text>
+              <ArrowRight size={14} color={Colors.dark.tint} />
+            </TouchableOpacity>
+          </View>
+          <FlatList
+            data={MOCK_READERS.filter(r => r.isOnline)}
+            renderItem={renderOnlineReaderItem}
+            keyExtractor={(item) => item.id}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.horizontalList}
+          />
+        </View>
+
         {/* Live Streams */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Live Now</Text>
-            <TouchableOpacity onPress={() => router.push('/live')}>
+            <Text style={styles.sectionTitle}>Active Live Streams</Text>
+            <TouchableOpacity onPress={() => router.push('/live')} style={styles.seeAllButton}>
               <Text style={styles.seeAllText}>See All</Text>
+              <ArrowRight size={14} color={Colors.dark.tint} />
             </TouchableOpacity>
           </View>
           <FlatList
@@ -107,24 +207,79 @@ export default function HomeScreen() {
             keyExtractor={(item) => item.id}
             horizontal
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.streamsList}
+            contentContainerStyle={styles.horizontalList}
           />
         </View>
 
-        {/* Online Readers */}
+        {/* Featured Products */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Available Readers</Text>
-            <TouchableOpacity onPress={() => router.push('/readings')}>
-              <Text style={styles.seeAllText}>Filter</Text>
+            <Text style={styles.sectionTitle}>Featured Products</Text>
+            <TouchableOpacity onPress={() => router.push('/shop')} style={styles.seeAllButton}>
+              <Text style={styles.seeAllText}>Shop All</Text>
+              <ArrowRight size={14} color={Colors.dark.tint} />
             </TouchableOpacity>
           </View>
-          {MOCK_READERS.map((reader) => (
-            <View key={reader.id} style={{ marginBottom: 12 }}>
-              {renderReaderItem({ item: reader })}
-            </View>
-          ))}
+          <FlatList
+            data={MOCK_PRODUCTS}
+            renderItem={renderProductItem}
+            keyExtractor={(item) => item.id}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.horizontalList}
+          />
         </View>
+
+        {/* Community Highlights */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Community Highlights</Text>
+            <TouchableOpacity onPress={() => router.push('/community')} style={styles.seeAllButton}>
+              <Text style={styles.seeAllText}>Join Discussion</Text>
+              <ArrowRight size={14} color={Colors.dark.tint} />
+            </TouchableOpacity>
+          </View>
+          <FlatList
+            data={MOCK_COMMUNITY_HIGHLIGHTS}
+            renderItem={renderCommunityItem}
+            keyExtractor={(item) => item.id}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.horizontalList}
+          />
+        </View>
+
+        {/* Newsletter Signup */}
+        <View style={styles.newsletterSection}>
+          <LinearGradient
+            colors={[Colors.dark.card, 'rgba(255, 105, 180, 0.1)']}
+            style={styles.newsletterContainer}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          >
+            <Text style={styles.newsletterTitle}>Join Our Soul Tribe</Text>
+            <Text style={styles.newsletterDescription}>
+              Sign up for our newsletter to receive daily horoscopes, special offers, and spiritual guidance.
+            </Text>
+            <View style={styles.inputContainer}>
+              <TextInput
+                style={styles.input}
+                placeholder="Enter your email"
+                placeholderTextColor="rgba(255,255,255,0.4)"
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+                autoCapitalize="none"
+              />
+              <TouchableOpacity style={styles.subscribeButton}>
+                <Text style={styles.subscribeButtonText}>Sign Up</Text>
+              </TouchableOpacity>
+            </View>
+          </LinearGradient>
+        </View>
+
+        {/* Bottom padding for tabs */}
+        <View style={{ height: 40 }} />
       </ScrollView>
     </View>
   );
@@ -144,53 +299,150 @@ const styles = StyleSheet.create({
   },
   heroContainer: {
     alignItems: 'center',
-    marginBottom: 24,
+    marginBottom: 32,
     marginTop: 10,
+    paddingHorizontal: 16,
   },
   heroImage: {
-    width: width - 32,
-    height: 200,
+    width: '100%',
+    height: 220,
     borderRadius: 16,
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    borderColor: 'rgba(255, 255, 255, 0.15)',
   },
   tagline: {
     fontFamily: 'PlayfairDisplay_400Regular',
-    fontSize: 22,
+    fontSize: 24,
     color: '#FFFFFF',
     textAlign: 'center',
     fontStyle: 'italic',
+    textShadowColor: 'rgba(0, 0, 0, 0.75)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
+  },
+  quickActionsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 24,
+    marginBottom: 32,
+  },
+  quickActionButton: {
+    alignItems: 'center',
+    gap: 8,
+  },
+  quickActionIconContainer: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 105, 180, 0.3)',
+  },
+  quickActionLabel: {
+    color: 'white',
+    fontSize: 12,
+    fontFamily: 'PlayfairDisplay_400Regular',
   },
   section: {
-    marginBottom: 24,
+    marginBottom: 32,
   },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 16,
-    marginBottom: 12,
+    marginBottom: 16,
   },
   sectionTitle: {
-    fontFamily: 'PlayfairDisplay_700Bold',
-    fontSize: 20,
-    color: '#FFFFFF',
+    fontFamily: 'AlexBrush_400Regular',
+    fontSize: 28,
+    color: Colors.dark.tint,
+  },
+  seeAllButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
   },
   seeAllText: {
     color: Colors.dark.tint,
     fontFamily: 'PlayfairDisplay_400Regular',
+    fontSize: 14,
   },
-  streamsList: {
+  horizontalList: {
     paddingHorizontal: 16,
-    gap: 12,
+    gap: 16,
   },
+  // Online Reader Card
+  onlineReaderCard: {
+    width: 140,
+    backgroundColor: 'rgba(26, 26, 36, 0.8)',
+    borderRadius: 12,
+    padding: 12,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
+  },
+  onlineReaderImageContainer: {
+    marginBottom: 8,
+    position: 'relative',
+  },
+  onlineReaderAvatar: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    borderWidth: 2,
+    borderColor: Colors.dark.tint,
+  },
+  onlineIndicator: {
+    position: 'absolute',
+    bottom: 4,
+    right: 4,
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    backgroundColor: '#00FF00',
+    borderWidth: 2,
+    borderColor: Colors.dark.card,
+  },
+  onlineReaderName: {
+    color: 'white',
+    fontFamily: 'PlayfairDisplay_700Bold',
+    fontSize: 16,
+    marginBottom: 2,
+    textAlign: 'center',
+  },
+  onlineReaderSpecialty: {
+    color: 'rgba(255,255,255,0.6)',
+    fontSize: 12,
+    marginBottom: 6,
+    textAlign: 'center',
+  },
+  onlineReaderRating: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginBottom: 6,
+  },
+  onlineReaderRatingText: {
+    color: 'rgba(255,255,255,0.8)',
+    fontSize: 12,
+  },
+  onlineReaderPrice: {
+    color: Colors.dark.tint,
+    fontWeight: 'bold',
+    fontSize: 12,
+  },
+  // Stream Item
   streamItem: {
-    width: 160,
-    height: 220,
+    width: 200,
+    height: 140,
     borderRadius: 12,
     overflow: 'hidden',
     backgroundColor: Colors.dark.card,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
   },
   streamThumbnail: {
     width: '100%',
@@ -201,8 +453,8 @@ const styles = StyleSheet.create({
     top: 8,
     left: 8,
     backgroundColor: '#FF0033',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
     borderRadius: 4,
     zIndex: 1,
   },
@@ -219,93 +471,163 @@ const styles = StyleSheet.create({
     padding: 12,
     paddingTop: 40,
   },
+  streamReaderName: {
+    color: Colors.dark.tint,
+    fontSize: 12,
+    fontWeight: 'bold',
+    marginBottom: 2,
+  },
   streamTitle: {
     color: 'white',
     fontSize: 14,
     fontWeight: 'bold',
     marginBottom: 4,
   },
+  viewerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
   streamViewerCount: {
     color: 'rgba(255,255,255,0.8)',
-    fontSize: 12,
+    fontSize: 10,
   },
-  readerCard: {
-    marginHorizontal: 16,
-    backgroundColor: Colors.dark.card,
+  // Product Card
+  productCard: {
+    width: 150,
+    backgroundColor: 'rgba(26, 26, 36, 0.8)',
     borderRadius: 12,
-    padding: 12,
+    overflow: 'hidden',
     borderWidth: 1,
-    borderColor: Colors.dark.border,
+    borderColor: 'rgba(255,255,255,0.1)',
   },
-  readerRow: {
+  productImage: {
+    width: '100%',
+    height: 150,
+  },
+  productInfo: {
+    padding: 10,
+  },
+  productName: {
+    color: 'white',
+    fontFamily: 'PlayfairDisplay_400Regular',
+    fontSize: 14,
+    marginBottom: 6,
+    height: 40,
+  },
+  productMeta: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
   },
-  readerAvatar: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    marginRight: 12,
-  },
-  readerInfo: {
-    flex: 1,
-  },
-  readerName: {
-    color: 'white',
-    fontSize: 18,
-    fontFamily: 'PlayfairDisplay_700Bold',
-    marginBottom: 2,
-  },
-  readerSpecialty: {
-    color: 'rgba(255,255,255,0.6)',
+  productPrice: {
+    color: Colors.dark.tint,
+    fontWeight: 'bold',
     fontSize: 14,
+  },
+  productRating: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2,
+  },
+  productRatingText: {
+    color: 'rgba(255,255,255,0.6)',
+    fontSize: 10,
+  },
+  // Community Card
+  communityCard: {
+    width: 240,
+    height: 160,
+    borderRadius: 12,
+    overflow: 'hidden',
+    backgroundColor: Colors.dark.card,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
+  },
+  communityImage: {
+    width: '100%',
+    height: '100%',
+    opacity: 0.8,
+  },
+  communityOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    padding: 12,
+    justifyContent: 'flex-end',
+  },
+  communityTitle: {
+    color: 'white',
+    fontSize: 16,
+    fontFamily: 'PlayfairDisplay_700Bold',
     marginBottom: 4,
   },
-  ratingRow: {
+  communityAuthor: {
+    color: Colors.dark.tint,
+    fontSize: 12,
+    marginBottom: 8,
+  },
+  communityStats: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  communityStat: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 4,
   },
-  ratingStar: {
-    color: '#FFD700',
-    marginRight: 4,
+  communityStatText: {
+    color: 'white',
     fontSize: 12,
   },
-  ratingText: {
-    color: 'rgba(255,255,255,0.6)',
-    fontSize: 12,
-  },
-  readerAction: {
-    alignItems: 'flex-end',
-    justifyContent: 'center',
-  },
-  priceText: {
-    color: Colors.dark.tint,
-    fontWeight: 'bold',
-    marginBottom: 6,
-  },
-  chatButton: {
-    backgroundColor: 'rgba(255, 105, 180, 0.1)',
+  // Newsletter
+  newsletterSection: {
     paddingHorizontal: 16,
-    paddingVertical: 6,
-    borderRadius: 20,
+    marginBottom: 24,
+  },
+  newsletterContainer: {
+    padding: 20,
+    borderRadius: 16,
     borderWidth: 1,
-    borderColor: Colors.dark.tint,
+    borderColor: 'rgba(255, 105, 180, 0.3)',
   },
-  chatButtonText: {
-    color: Colors.dark.tint,
-    fontSize: 12,
+  newsletterTitle: {
+    color: 'white',
+    fontFamily: 'AlexBrush_400Regular',
+    fontSize: 28,
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  newsletterDescription: {
+    color: 'rgba(255,255,255,0.8)',
+    fontSize: 14,
+    textAlign: 'center',
+    marginBottom: 16,
+    fontFamily: 'PlayfairDisplay_400Regular',
+    lineHeight: 20,
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  input: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    color: 'white',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.2)',
+  },
+  subscribeButton: {
+    backgroundColor: Colors.dark.tint,
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  subscribeButtonText: {
+    color: 'white',
     fontWeight: 'bold',
-  },
-  onlineIndicator: {
-    position: 'absolute',
-    top: 12,
-    left: 12,
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    backgroundColor: '#00FF00',
-    borderWidth: 2,
-    borderColor: Colors.dark.card,
-    zIndex: 1,
+    fontSize: 14,
   },
 });
