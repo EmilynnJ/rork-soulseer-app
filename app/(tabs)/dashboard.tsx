@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Switch, Platform } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Switch, Platform, ActivityIndicator } from 'react-native';
 import { Image } from 'expo-image';
 import { Header } from '@/components/Header';
 import { Colors } from '@/constants/colors';
@@ -19,9 +19,29 @@ import {
   RefreshCw
 } from 'lucide-react-native';
 import { useUser } from '@/context/UserContext';
+import { useQuery } from '@tanstack/react-query';
+import { apiService } from '@/services/api';
 
 export default function DashboardScreen() {
-  const { user, toggleRole, isReaderOnline, toggleOnlineStatus, addFunds } = useUser();
+  const { user, isLoading: userLoading, toggleRole, isReaderOnline, toggleOnlineStatus, addFunds } = useUser();
+
+  const { data: readerEarnings } = useQuery({
+    queryKey: ['reader', 'earnings', user?.id],
+    queryFn: () => apiService.getReaderEarnings(user!.id),
+    enabled: !!user && user.role === 'reader',
+  });
+
+  if (userLoading || !user) {
+    return (
+      <View style={styles.container}>
+        <Header title="Dashboard" showShop={true} />
+        <View style={styles.centerContainer}>
+          <ActivityIndicator size="large" color={Colors.dark.tint} />
+          <Text style={styles.loadingText}>Loading your profile...</Text>
+        </View>
+      </View>
+    );
+  }
 
   const renderClientDashboard = () => (
     <>
@@ -83,11 +103,11 @@ export default function DashboardScreen() {
       <View style={styles.statsContainer}>
         <View style={styles.statCard}>
           <Text style={styles.statLabel}>Today&apos;s Earnings</Text>
-          <Text style={styles.statValue}>$124.50</Text>
+          <Text style={styles.statValue}>${readerEarnings?.todayEarnings.toFixed(2) || '0.00'}</Text>
         </View>
         <View style={styles.statCard}>
           <Text style={styles.statLabel}>Pending Payout</Text>
-          <Text style={styles.statValue}>$450.00</Text>
+          <Text style={styles.statValue}>${readerEarnings?.pendingPayout.toFixed(2) || '0.00'}</Text>
         </View>
       </View>
 
@@ -193,6 +213,18 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.dark.background,
+  },
+  centerContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 32,
+  },
+  loadingText: {
+    color: 'rgba(255,255,255,0.6)',
+    fontSize: 14,
+    fontFamily: 'PlayfairDisplay_400Regular',
+    marginTop: 16,
   },
   content: {
     padding: 20,

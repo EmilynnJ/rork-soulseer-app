@@ -1,15 +1,22 @@
 import React from 'react';
-import { StyleSheet, Text, View, FlatList, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { Colors } from '@/constants/colors';
 import { Header } from '@/components/Header';
-import { MOCK_READERS } from '@/mocks/readers';
+import { useQuery } from '@tanstack/react-query';
+import { apiService } from '@/services/api';
+import { Reader } from '@/types/api';
 
 export default function ReadingsScreen() {
   const router = useRouter();
 
-  const renderReaderItem = ({ item }: { item: typeof MOCK_READERS[0] }) => (
+  const { data: readers = [], isLoading } = useQuery({
+    queryKey: ['readers', 'all'],
+    queryFn: () => apiService.getAllReaders(),
+  });
+
+  const renderReaderItem = ({ item }: { item: Reader }) => (
     <View style={styles.readerCard}>
       <View style={styles.readerRow}>
         <Image source={{ uri: item.avatar }} style={styles.readerAvatar} />
@@ -40,11 +47,34 @@ export default function ReadingsScreen() {
     </View>
   );
 
+  if (isLoading) {
+    return (
+      <View style={styles.container}>
+        <Header title="Our Psychics" />
+        <View style={styles.centerContainer}>
+          <ActivityIndicator size="large" color={Colors.dark.tint} />
+        </View>
+      </View>
+    );
+  }
+
+  if (readers.length === 0) {
+    return (
+      <View style={styles.container}>
+        <Header title="Our Psychics" />
+        <View style={styles.centerContainer}>
+          <Text style={styles.emptyText}>No readers available at the moment</Text>
+          <Text style={styles.emptySubtext}>Please check back later</Text>
+        </View>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <Header title="Our Psychics" />
       <FlatList
-        data={MOCK_READERS}
+        data={readers}
         renderItem={renderReaderItem}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContent}
@@ -57,6 +87,25 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.dark.background,
+  },
+  centerContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 32,
+  },
+  emptyText: {
+    color: Colors.dark.text,
+    fontSize: 18,
+    fontFamily: 'PlayfairDisplay_700Bold',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  emptySubtext: {
+    color: 'rgba(255,255,255,0.6)',
+    fontSize: 14,
+    fontFamily: 'PlayfairDisplay_400Regular',
+    textAlign: 'center',
   },
   listContent: {
     padding: 16,

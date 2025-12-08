@@ -7,14 +7,17 @@ import {
   FlatList,
   TouchableOpacity,
   TextInput,
+  ActivityIndicator,
 } from 'react-native';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { Colors } from '@/constants/colors';
-import { MOCK_READERS, MOCK_STREAMS, MOCK_PRODUCTS, MOCK_COMMUNITY_HIGHLIGHTS } from '@/mocks/readers';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Header } from '@/components/Header';
 import { Eye, ShoppingBag, Users, Mail, Star, Heart, MessageCircle, ArrowRight } from 'lucide-react-native';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { apiService } from '@/services/api';
+import { Reader, LiveStream, Product, CommunityPost } from '@/types/api';
 
 const BACKGROUND_IMAGE =
   'https://i.postimg.cc/sXdsKGTK/DALL-E-2025-06-06-14-36-29-A-vivid-ethereal-background-image-designed-for-a-psychic-reading-app.webp';
@@ -24,7 +27,44 @@ export default function HomeScreen() {
   const router = useRouter();
   const [email, setEmail] = useState('');
 
-  const renderStreamItem = ({ item }: { item: typeof MOCK_STREAMS[0] }) => (
+  const { data: onlineReaders = [], isLoading: loadingReaders } = useQuery({
+    queryKey: ['readers', 'online'],
+    queryFn: () => apiService.getOnlineReaders(),
+  });
+
+  const { data: streams = [], isLoading: loadingStreams } = useQuery({
+    queryKey: ['streams', 'live'],
+    queryFn: () => apiService.getLiveStreams(),
+  });
+
+  const { data: products = [], isLoading: loadingProducts } = useQuery({
+    queryKey: ['products', 'featured'],
+    queryFn: () => apiService.getProducts(),
+  });
+
+  const { data: communityPosts = [], isLoading: loadingCommunity } = useQuery({
+    queryKey: ['community', 'highlights'],
+    queryFn: () => apiService.getCommunityPosts(4),
+  });
+
+  const newsletterMutation = useMutation({
+    mutationFn: (email: string) => apiService.subscribeToNewsletter(email),
+    onSuccess: () => {
+      setEmail('');
+      console.log('Successfully subscribed to newsletter');
+    },
+    onError: (error) => {
+      console.error('Failed to subscribe:', error);
+    },
+  });
+
+  const handleNewsletterSignup = () => {
+    if (email.trim()) {
+      newsletterMutation.mutate(email.trim());
+    }
+  };
+
+  const renderStreamItem = ({ item }: { item: LiveStream }) => (
     <TouchableOpacity 
       style={styles.streamItem}
       onPress={() => router.push('/live')}
@@ -47,7 +87,7 @@ export default function HomeScreen() {
     </TouchableOpacity>
   );
 
-  const renderOnlineReaderItem = ({ item }: { item: typeof MOCK_READERS[0] }) => (
+  const renderOnlineReaderItem = ({ item }: { item: Reader }) => (
     <TouchableOpacity 
       style={styles.onlineReaderCard}
       onPress={() => router.push(`/reading/${item.id}`)}
@@ -67,7 +107,7 @@ export default function HomeScreen() {
     </TouchableOpacity>
   );
 
-  const renderProductItem = ({ item }: { item: typeof MOCK_PRODUCTS[0] }) => (
+  const renderProductItem = ({ item }: { item: Product }) => (
     <TouchableOpacity 
       style={styles.productCard}
       onPress={() => router.push('/shop')}
@@ -87,13 +127,13 @@ export default function HomeScreen() {
     </TouchableOpacity>
   );
 
-  const renderCommunityItem = ({ item }: { item: typeof MOCK_COMMUNITY_HIGHLIGHTS[0] }) => (
+  const renderCommunityItem = ({ item }: { item: CommunityPost }) => (
     <TouchableOpacity 
       style={styles.communityCard}
       onPress={() => router.push('/community')}
       activeOpacity={0.8}
     >
-      <Image source={{ uri: item.image }} style={styles.communityImage} contentFit="cover" />
+      <Image source={{ uri: item.image || 'https://images.unsplash.com/photo-1519681393784-d120267933ba?w=800&fit=crop' }} style={styles.communityImage} contentFit="cover" />
       <LinearGradient
         colors={['transparent', 'rgba(0,0,0,0.8)']}
         style={styles.communityOverlay}
@@ -126,6 +166,12 @@ export default function HomeScreen() {
     </TouchableOpacity>
   );
 
+  const EmptyState = ({ message }: { message: string }) => (
+    <View style={styles.emptyState}>
+      <Text style={styles.emptyStateText}>{message}</Text>
+    </View>
+  );
+
   return (
     <View style={styles.container}>
       <Image
@@ -136,20 +182,17 @@ export default function HomeScreen() {
       />
       <View style={styles.overlay} />
       
-      {/* Transparent Header */}
       <Header transparent={true} />
       
       <ScrollView 
         contentContainerStyle={[styles.scrollContent]}
         showsVerticalScrollIndicator={false}
       >
-        {/* Hero Section */}
         <View style={styles.heroContainer}>
           <Image source={{ uri: HERO_IMAGE }} style={styles.heroImage} contentFit="cover" />
           <Text style={styles.tagline}>A Community of Gifted Psychics</Text>
         </View>
 
-        {/* Quick Access Buttons */}
         <View style={styles.quickActionsContainer}>
           <QuickActionButton 
             icon={<Eye color={Colors.dark.tint} size={24} />} 
@@ -173,7 +216,6 @@ export default function HomeScreen() {
           />
         </View>
 
-        {/* Online Readers */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Online Readers</Text>
@@ -182,17 +224,22 @@ export default function HomeScreen() {
               <ArrowRight size={14} color={Colors.dark.tint} />
             </TouchableOpacity>
           </View>
-          <FlatList
-            data={MOCK_READERS.filter(r => r.isOnline)}
-            renderItem={renderOnlineReaderItem}
-            keyExtractor={(item) => item.id}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.horizontalList}
-          />
+          {loadingReaders ? (
+            <ActivityIndicator size="large" color={Colors.dark.tint} style={styles.loader} />
+          ) : onlineReaders.length > 0 ? (
+            <FlatList
+              data={onlineReaders}
+              renderItem={renderOnlineReaderItem}
+              keyExtractor={(item) => item.id}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.horizontalList}
+            />
+          ) : (
+            <EmptyState message="No readers are currently online" />
+          )}
         </View>
 
-        {/* Live Streams */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Active Live Streams</Text>
@@ -201,17 +248,22 @@ export default function HomeScreen() {
               <ArrowRight size={14} color={Colors.dark.tint} />
             </TouchableOpacity>
           </View>
-          <FlatList
-            data={MOCK_STREAMS}
-            renderItem={renderStreamItem}
-            keyExtractor={(item) => item.id}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.horizontalList}
-          />
+          {loadingStreams ? (
+            <ActivityIndicator size="large" color={Colors.dark.tint} style={styles.loader} />
+          ) : streams.length > 0 ? (
+            <FlatList
+              data={streams}
+              renderItem={renderStreamItem}
+              keyExtractor={(item) => item.id}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.horizontalList}
+            />
+          ) : (
+            <EmptyState message="No live streams at the moment" />
+          )}
         </View>
 
-        {/* Featured Products */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Featured Products</Text>
@@ -220,17 +272,22 @@ export default function HomeScreen() {
               <ArrowRight size={14} color={Colors.dark.tint} />
             </TouchableOpacity>
           </View>
-          <FlatList
-            data={MOCK_PRODUCTS}
-            renderItem={renderProductItem}
-            keyExtractor={(item) => item.id}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.horizontalList}
-          />
+          {loadingProducts ? (
+            <ActivityIndicator size="large" color={Colors.dark.tint} style={styles.loader} />
+          ) : products.length > 0 ? (
+            <FlatList
+              data={products.slice(0, 5)}
+              renderItem={renderProductItem}
+              keyExtractor={(item) => item.id}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.horizontalList}
+            />
+          ) : (
+            <EmptyState message="No products available" />
+          )}
         </View>
 
-        {/* Community Highlights */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Community Highlights</Text>
@@ -239,17 +296,22 @@ export default function HomeScreen() {
               <ArrowRight size={14} color={Colors.dark.tint} />
             </TouchableOpacity>
           </View>
-          <FlatList
-            data={MOCK_COMMUNITY_HIGHLIGHTS}
-            renderItem={renderCommunityItem}
-            keyExtractor={(item) => item.id}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.horizontalList}
-          />
+          {loadingCommunity ? (
+            <ActivityIndicator size="large" color={Colors.dark.tint} style={styles.loader} />
+          ) : communityPosts.length > 0 ? (
+            <FlatList
+              data={communityPosts}
+              renderItem={renderCommunityItem}
+              keyExtractor={(item) => item.id}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.horizontalList}
+            />
+          ) : (
+            <EmptyState message="No community posts yet" />
+          )}
         </View>
 
-        {/* Newsletter Signup */}
         <View style={styles.newsletterSection}>
           <LinearGradient
             colors={[Colors.dark.card, 'rgba(255, 105, 180, 0.1)']}
@@ -271,14 +333,21 @@ export default function HomeScreen() {
                 keyboardType="email-address"
                 autoCapitalize="none"
               />
-              <TouchableOpacity style={styles.subscribeButton}>
-                <Text style={styles.subscribeButtonText}>Sign Up</Text>
+              <TouchableOpacity 
+                style={[styles.subscribeButton, newsletterMutation.isPending && styles.subscribeButtonDisabled]}
+                onPress={handleNewsletterSignup}
+                disabled={newsletterMutation.isPending}
+              >
+                {newsletterMutation.isPending ? (
+                  <ActivityIndicator size="small" color="white" />
+                ) : (
+                  <Text style={styles.subscribeButtonText}>Sign Up</Text>
+                )}
               </TouchableOpacity>
             </View>
           </LinearGradient>
         </View>
 
-        {/* Bottom padding for tabs */}
         <View style={{ height: 40 }} />
       </ScrollView>
     </View>
@@ -292,7 +361,7 @@ const styles = StyleSheet.create({
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(13, 13, 21, 0.85)', // Darken background image
+    backgroundColor: 'rgba(13, 13, 21, 0.85)',
   },
   scrollContent: {
     paddingBottom: 100,
@@ -374,7 +443,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     gap: 16,
   },
-  // Online Reader Card
+  loader: {
+    paddingVertical: 40,
+  },
+  emptyState: {
+    paddingVertical: 40,
+    paddingHorizontal: 16,
+    alignItems: 'center',
+  },
+  emptyStateText: {
+    color: 'rgba(255,255,255,0.5)',
+    fontSize: 14,
+    fontFamily: 'PlayfairDisplay_400Regular',
+    textAlign: 'center',
+  },
   onlineReaderCard: {
     width: 140,
     backgroundColor: 'rgba(26, 26, 36, 0.8)',
@@ -434,7 +516,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 12,
   },
-  // Stream Item
   streamItem: {
     width: 200,
     height: 140,
@@ -492,7 +573,6 @@ const styles = StyleSheet.create({
     color: 'rgba(255,255,255,0.8)',
     fontSize: 10,
   },
-  // Product Card
   productCard: {
     width: 150,
     backgroundColor: 'rgba(26, 26, 36, 0.8)',
@@ -534,7 +614,6 @@ const styles = StyleSheet.create({
     color: 'rgba(255,255,255,0.6)',
     fontSize: 10,
   },
-  // Community Card
   communityCard: {
     width: 240,
     height: 160,
@@ -578,7 +657,6 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 12,
   },
-  // Newsletter
   newsletterSection: {
     paddingHorizontal: 16,
     marginBottom: 24,
@@ -624,6 +702,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     justifyContent: 'center',
     alignItems: 'center',
+    minWidth: 80,
+  },
+  subscribeButtonDisabled: {
+    opacity: 0.6,
   },
   subscribeButtonText: {
     color: 'white',

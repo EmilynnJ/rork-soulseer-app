@@ -1,58 +1,54 @@
 import createContextHook from '@nkzw/create-context-hook';
 import { useState } from 'react';
-
-type UserRole = 'client' | 'reader' | 'admin';
-
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  role: UserRole;
-  avatar: string;
-  balance: number;
-}
-
-const DEFAULT_USER: User = {
-  id: 'u1',
-  name: 'Sarah Anderson',
-  email: 'sarah.anderson@example.com',
-  role: 'client', // Default role
-  avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&fit=crop',
-  balance: 45.00,
-};
-
-// Mock Reader Profile for when switching to reader
-const READER_PROFILE = {
-  id: 'r1',
-  name: 'Mystic Sarah',
-  email: 'sarah.reader@soulseer.app',
-  role: 'reader' as const,
-  avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&fit=crop',
-  balance: 1250.50,
-};
+import { apiService } from '@/services/api';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 export const [UserContext, useUser] = createContextHook(() => {
-  const [user, setUser] = useState<User>(DEFAULT_USER);
   const [isReaderOnline, setIsReaderOnline] = useState(false);
+  const queryClient = useQueryClient();
 
-  const toggleRole = () => {
-    if (user.role === 'client') {
-      setUser({ ...READER_PROFILE, role: 'reader' });
-    } else {
-      setUser({ ...DEFAULT_USER, role: 'client' });
+  const { data: user, isLoading, error } = useQuery({
+    queryKey: ['user', 'current'],
+    queryFn: () => apiService.getCurrentUser(),
+    retry: false,
+  });
+
+  const addFundsMutation = useMutation({
+    mutationFn: ({ userId, amount }: { userId: string; amount: number }) => 
+      apiService.addFunds(userId, amount),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['user', 'current'] });
+    },
+  });
+
+  const toggleStatusMutation = useMutation({
+    mutationFn: ({ readerId, isOnline }: { readerId: string; isOnline: boolean }) => 
+      apiService.updateReaderStatus(readerId, isOnline),
+    onSuccess: () => {
+      setIsReaderOnline((prev) => !prev);
+    },
+  });
+
+  const addFunds = (amount: number) => {
+    if (user?.id) {
+      addFundsMutation.mutate({ userId: user.id, amount });
     }
   };
 
   const toggleOnlineStatus = () => {
-    setIsReaderOnline((prev) => !prev);
+    if (user?.id && user?.role === 'reader') {
+      toggleStatusMutation.mutate({ readerId: user.id, isOnline: !isReaderOnline });
+    }
   };
 
-  const addFunds = (amount: number) => {
-    setUser((prev) => ({ ...prev, balance: prev.balance + amount }));
+  const toggleRole = () => {
+    console.log('Role switching is managed by authentication system');
   };
 
   return {
-    user,
+    user: user || null,
+    isLoading,
+    error,
     isReaderOnline,
     toggleRole,
     toggleOnlineStatus,

@@ -1,36 +1,29 @@
 import React from 'react';
-import { StyleSheet, Text, View, FlatList, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { Image } from 'expo-image';
 import { Header } from '@/components/Header';
 import { Colors } from '@/constants/colors';
-
-const MOCK_MESSAGES = [
-  {
-    id: '1',
-    readerName: 'Mystic Luna',
-    lastMessage: 'Your reading is ready for review.',
-    time: '2m ago',
-    unread: 1,
-    avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&h=400&fit=crop',
-  },
-  {
-    id: '2',
-    readerName: 'Crystal Sage',
-    lastMessage: 'Thank you for the session! Remember to cleanse your crystals.',
-    time: '1d ago',
-    unread: 0,
-    avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400&h=400&fit=crop',
-  },
-];
+import { useQuery } from '@tanstack/react-query';
+import { apiService } from '@/services/api';
+import { useUser } from '@/context/UserContext';
+import { Message } from '@/types/api';
 
 export default function MessagesScreen() {
-  const renderMessageItem = ({ item }: { item: typeof MOCK_MESSAGES[0] }) => (
+  const { user } = useUser();
+
+  const { data: messages = [], isLoading } = useQuery({
+    queryKey: ['messages', user?.id],
+    queryFn: () => apiService.getMessages(user?.id || ''),
+    enabled: !!user?.id,
+  });
+
+  const renderMessageItem = ({ item }: { item: Message }) => (
     <TouchableOpacity style={styles.messageItem}>
-      <Image source={{ uri: item.avatar }} style={styles.avatar} />
+      <Image source={{ uri: item.senderAvatar }} style={styles.avatar} />
       <View style={styles.messageContent}>
         <View style={styles.messageHeader}>
-          <Text style={styles.readerName}>{item.readerName}</Text>
-          <Text style={styles.timeText}>{item.time}</Text>
+          <Text style={styles.readerName}>{item.senderName}</Text>
+          <Text style={styles.timeText}>{new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
         </View>
         <Text style={[styles.messageText, item.unread > 0 && styles.unreadText]} numberOfLines={1}>
           {item.lastMessage}
@@ -44,11 +37,34 @@ export default function MessagesScreen() {
     </TouchableOpacity>
   );
 
+  if (isLoading) {
+    return (
+      <View style={styles.container}>
+        <Header title="Messages" />
+        <View style={styles.centerContainer}>
+          <ActivityIndicator size="large" color={Colors.dark.tint} />
+        </View>
+      </View>
+    );
+  }
+
+  if (messages.length === 0) {
+    return (
+      <View style={styles.container}>
+        <Header title="Messages" />
+        <View style={styles.centerContainer}>
+          <Text style={styles.emptyText}>No messages yet</Text>
+          <Text style={styles.emptySubtext}>Start a conversation with a reader</Text>
+        </View>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <Header title="Messages" />
       <FlatList
-        data={MOCK_MESSAGES}
+        data={messages}
         renderItem={renderMessageItem}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContent}
@@ -61,6 +77,25 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.dark.background,
+  },
+  centerContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 32,
+  },
+  emptyText: {
+    color: Colors.dark.text,
+    fontSize: 18,
+    fontFamily: 'PlayfairDisplay_700Bold',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  emptySubtext: {
+    color: 'rgba(255,255,255,0.6)',
+    fontSize: 14,
+    fontFamily: 'PlayfairDisplay_400Regular',
+    textAlign: 'center',
   },
   listContent: {
     paddingHorizontal: 16,

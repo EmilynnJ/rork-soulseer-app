@@ -1,82 +1,91 @@
 import React from 'react';
-import { StyleSheet, Text, View, FlatList, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { Colors } from '@/constants/colors';
 import { Header } from '@/components/Header';
 import { MessageSquare, Heart, Share2 } from 'lucide-react-native';
-
-const TOPICS = [
-  {
-    id: '1',
-    title: 'Welcome to SoulSeer Community',
-    author: 'Emilynn (Founder)',
-    replies: 124,
-    likes: 450,
-    time: '2h ago',
-    tag: 'Announcements',
-  },
-  {
-    id: '2',
-    title: 'Daily Card Pull - Share Yours!',
-    author: 'Mystic Luna',
-    replies: 45,
-    likes: 89,
-    time: '4h ago',
-    tag: 'Tarot',
-  },
-  {
-    id: '3',
-    title: 'Understanding Mercury Retrograde',
-    author: 'Star Gazer',
-    replies: 23,
-    likes: 56,
-    time: '6h ago',
-    tag: 'Astrology',
-  },
-  {
-    id: '4',
-    title: 'New to Psychic Readings? Ask Here!',
-    author: 'Crystal Sage',
-    replies: 12,
-    likes: 34,
-    time: '1d ago',
-    tag: 'Support',
-  },
-];
+import { useQuery } from '@tanstack/react-query';
+import { apiService } from '@/services/api';
+import { CommunityPost } from '@/types/api';
 
 export default function CommunityScreen() {
-  const renderTopic = ({ item }: { item: typeof TOPICS[0] }) => (
-    <TouchableOpacity style={styles.topicCard}>
-      <View style={styles.topicHeader}>
-        <View style={styles.tagContainer}>
-          <Text style={styles.tagText}>{item.tag}</Text>
+  const { data: posts = [], isLoading } = useQuery({
+    queryKey: ['community', 'posts'],
+    queryFn: () => apiService.getCommunityPosts(),
+  });
+
+  const renderTopic = ({ item }: { item: CommunityPost }) => {
+    const timeAgo = getTimeAgo(item.createdAt);
+    
+    return (
+      <TouchableOpacity style={styles.topicCard}>
+        <View style={styles.topicHeader}>
+          <View style={styles.tagContainer}>
+            <Text style={styles.tagText}>{item.tag}</Text>
+          </View>
+          <Text style={styles.timeText}>{timeAgo}</Text>
         </View>
-        <Text style={styles.timeText}>{item.time}</Text>
+        
+        <Text style={styles.topicTitle}>{item.title}</Text>
+        <Text style={styles.topicAuthor}>by {item.author}</Text>
+        
+        <View style={styles.topicFooter}>
+          <View style={styles.statItem}>
+            <MessageSquare size={16} color="rgba(255,255,255,0.6)" />
+            <Text style={styles.statText}>{item.comments}</Text>
+          </View>
+          <View style={styles.statItem}>
+            <Heart size={16} color="rgba(255,255,255,0.6)" />
+            <Text style={styles.statText}>{item.likes}</Text>
+          </View>
+          <TouchableOpacity style={styles.shareIcon}>
+            <Share2 size={16} color="rgba(255,255,255,0.6)" />
+          </TouchableOpacity>
+        </View>
+      </TouchableOpacity>
+    );
+  };
+
+  function getTimeAgo(dateString: string): string {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    return `${diffDays}d ago`;
+  }
+
+  if (isLoading) {
+    return (
+      <View style={styles.container}>
+        <Header title="Soul Tribe" showShop={true} />
+        <View style={styles.centerContainer}>
+          <ActivityIndicator size="large" color={Colors.dark.tint} />
+        </View>
       </View>
-      
-      <Text style={styles.topicTitle}>{item.title}</Text>
-      <Text style={styles.topicAuthor}>by {item.author}</Text>
-      
-      <View style={styles.topicFooter}>
-        <View style={styles.statItem}>
-          <MessageSquare size={16} color="rgba(255,255,255,0.6)" />
-          <Text style={styles.statText}>{item.replies}</Text>
+    );
+  }
+
+  if (posts.length === 0) {
+    return (
+      <View style={styles.container}>
+        <Header title="Soul Tribe" showShop={true} />
+        <View style={styles.centerContainer}>
+          <Text style={styles.emptyText}>No community posts yet</Text>
+          <Text style={styles.emptySubtext}>Be the first to start a conversation</Text>
         </View>
-        <View style={styles.statItem}>
-          <Heart size={16} color="rgba(255,255,255,0.6)" />
-          <Text style={styles.statText}>{item.likes}</Text>
-        </View>
-        <TouchableOpacity style={styles.shareIcon}>
-          <Share2 size={16} color="rgba(255,255,255,0.6)" />
-        </TouchableOpacity>
       </View>
-    </TouchableOpacity>
-  );
+    );
+  }
 
   return (
     <View style={styles.container}>
       <Header title="Soul Tribe" showShop={true} />
       <FlatList
-        data={TOPICS}
+        data={posts}
         renderItem={renderTopic}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContent}
@@ -89,6 +98,25 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.dark.background,
+  },
+  centerContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 32,
+  },
+  emptyText: {
+    color: Colors.dark.text,
+    fontSize: 18,
+    fontFamily: 'PlayfairDisplay_700Bold',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  emptySubtext: {
+    color: 'rgba(255,255,255,0.6)',
+    fontSize: 14,
+    fontFamily: 'PlayfairDisplay_400Regular',
+    textAlign: 'center',
   },
   listContent: {
     padding: 16,
