@@ -10,7 +10,7 @@ import {
 } from '@expo-google-fonts/playfair-display';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -42,6 +42,7 @@ export default function RootLayout() {
     PlayfairDisplay_400Regular,
     PlayfairDisplay_700Bold,
   });
+  const [forceRender, setForceRender] = useState(false);
 
   const loaded = alexBrushLoaded && playfairLoaded;
 
@@ -51,7 +52,16 @@ export default function RootLayout() {
     }
   }, [loaded]);
 
-  if (!loaded) {
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      console.log('Force rendering app after timeout');
+      setForceRender(true);
+      SplashScreen.hideAsync();
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (!loaded && !forceRender) {
     return null;
   }
 

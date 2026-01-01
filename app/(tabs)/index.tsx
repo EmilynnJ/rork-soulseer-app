@@ -67,6 +67,7 @@ export default function HomeScreen() {
         <Text style={styles.streamTitle} numberOfLines={1}>{item.title}</Text>
         <View style={styles.viewerContainer}>
           <Eye size={12} color="rgba(255,255,255,0.8)" />
+          <View style={{ width: 4 }} />
           <Text style={styles.streamViewerCount}>{item.viewers} watching</Text>
         </View>
       </LinearGradient>
@@ -87,6 +88,7 @@ export default function HomeScreen() {
       <Text style={styles.onlineReaderSpecialty} numberOfLines={1}>{item.specialty}</Text>
       <View style={styles.onlineReaderRating}>
         <Star size={10} color="#FFD700" fill="#FFD700" />
+        <View style={{ width: 4 }} />
         <Text style={styles.onlineReaderRatingText}>{item.rating}</Text>
       </View>
       <Text style={styles.onlineReaderPrice}>${item.pricePerMin}/min</Text>
@@ -106,6 +108,7 @@ export default function HomeScreen() {
           <Text style={styles.productPrice}>${item.price.toFixed(2)}</Text>
           <View style={styles.productRating}>
             <Star size={10} color="#FFD700" fill="#FFD700" />
+            <View style={{ width: 2 }} />
             <Text style={styles.productRatingText}>{item.rating}</Text>
           </View>
         </View>
@@ -129,10 +132,12 @@ export default function HomeScreen() {
         <View style={styles.communityStats}>
           <View style={styles.communityStat}>
             <Heart size={12} color="white" />
+            <View style={{ width: 4 }} />
             <Text style={styles.communityStatText}>{item.likes}</Text>
           </View>
           <View style={styles.communityStat}>
             <MessageCircle size={12} color="white" />
+            <View style={{ width: 4 }} />
             <Text style={styles.communityStatText}>{item.comments}</Text>
           </View>
         </View>
@@ -142,12 +147,15 @@ export default function HomeScreen() {
 
   const QuickActionButton = ({ icon, label, onPress }: { icon: React.ReactNode, label: string, onPress: () => void }) => (
     <TouchableOpacity style={styles.quickActionButton} onPress={onPress}>
-      <LinearGradient
-        colors={['rgba(255, 105, 180, 0.2)', 'rgba(255, 105, 180, 0.05)']}
-        style={styles.quickActionIconContainer}
-      >
-        {icon}
-      </LinearGradient>
+      <View>
+        <LinearGradient
+          colors={['rgba(255, 105, 180, 0.2)', 'rgba(255, 105, 180, 0.05)']}
+          style={styles.quickActionIconContainer}
+        >
+          {icon}
+        </LinearGradient>
+      </View>
+      <View style={{ height: 8 }} />
       <Text style={styles.quickActionLabel}>{label}</Text>
     </TouchableOpacity>
   );
@@ -207,6 +215,7 @@ export default function HomeScreen() {
             <Text style={styles.sectionTitle}>Online Readers</Text>
             <TouchableOpacity onPress={() => router.push('/readings')} style={styles.seeAllButton}>
               <Text style={styles.seeAllText}>See All</Text>
+              <View style={{ width: 4 }} />
               <ArrowRight size={14} color={Colors.dark.tint} />
             </TouchableOpacity>
           </View>
@@ -220,6 +229,7 @@ export default function HomeScreen() {
               horizontal
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.horizontalList}
+              ItemSeparatorComponent={() => <View style={{ width: 16 }} />}
             />
           ) : (
             <EmptyState message="No readers are currently online" />
@@ -231,6 +241,7 @@ export default function HomeScreen() {
             <Text style={styles.sectionTitle}>Active Live Streams</Text>
             <TouchableOpacity onPress={() => router.push('/live')} style={styles.seeAllButton}>
               <Text style={styles.seeAllText}>See All</Text>
+              <View style={{ width: 4 }} />
               <ArrowRight size={14} color={Colors.dark.tint} />
             </TouchableOpacity>
           </View>
@@ -244,6 +255,7 @@ export default function HomeScreen() {
               horizontal
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.horizontalList}
+              ItemSeparatorComponent={() => <View style={{ width: 16 }} />}
             />
           ) : (
             <EmptyState message="No live streams at the moment" />
@@ -255,6 +267,7 @@ export default function HomeScreen() {
             <Text style={styles.sectionTitle}>Featured Products</Text>
             <TouchableOpacity onPress={() => router.push('/shop')} style={styles.seeAllButton}>
               <Text style={styles.seeAllText}>Shop All</Text>
+              <View style={{ width: 4 }} />
               <ArrowRight size={14} color={Colors.dark.tint} />
             </TouchableOpacity>
           </View>
@@ -268,6 +281,7 @@ export default function HomeScreen() {
               horizontal
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.horizontalList}
+              ItemSeparatorComponent={() => <View style={{ width: 16 }} />}
             />
           ) : (
             <EmptyState message="No products available" />
@@ -279,6 +293,7 @@ export default function HomeScreen() {
             <Text style={styles.sectionTitle}>Community Highlights</Text>
             <TouchableOpacity onPress={() => router.push('/community')} style={styles.seeAllButton}>
               <Text style={styles.seeAllText}>Join Discussion</Text>
+              <View style={{ width: 4 }} />
               <ArrowRight size={14} color={Colors.dark.tint} />
             </TouchableOpacity>
           </View>
@@ -292,6 +307,7 @@ export default function HomeScreen() {
               horizontal
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.horizontalList}
+              ItemSeparatorComponent={() => <View style={{ width: 16 }} />}
             />
           ) : (
             <EmptyState message="No community posts yet" />
@@ -319,6 +335,7 @@ export default function HomeScreen() {
                 keyboardType="email-address"
                 autoCapitalize="none"
               />
+              <View style={{ width: 8 }} />
               <TouchableOpacity 
                 style={[styles.subscribeButton, newsletterMutation.isPending && styles.subscribeButtonDisabled]}
                 onPress={handleNewsletterSignup}
@@ -384,7 +401,6 @@ const styles = StyleSheet.create({
   },
   quickActionButton: {
     alignItems: 'center',
-    gap: 8,
   },
   quickActionIconContainer: {
     width: 60,
@@ -418,7 +434,6 @@ const styles = StyleSheet.create({
   seeAllButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
   },
   seeAllText: {
     color: Colors.dark.tint,
@@ -427,7 +442,6 @@ const styles = StyleSheet.create({
   },
   horizontalList: {
     paddingHorizontal: 16,
-    gap: 16,
   },
   loader: {
     paddingVertical: 40,
@@ -490,7 +504,6 @@ const styles = StyleSheet.create({
   onlineReaderRating: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
     marginBottom: 6,
   },
   onlineReaderRatingText: {
@@ -553,7 +566,6 @@ const styles = StyleSheet.create({
   viewerContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
   },
   streamViewerCount: {
     color: 'rgba(255,255,255,0.8)',
@@ -594,7 +606,6 @@ const styles = StyleSheet.create({
   productRating: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 2,
   },
   productRatingText: {
     color: 'rgba(255,255,255,0.6)',
@@ -632,12 +643,11 @@ const styles = StyleSheet.create({
   },
   communityStats: {
     flexDirection: 'row',
-    gap: 12,
   },
   communityStat: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    marginRight: 12,
   },
   communityStatText: {
     color: 'white',
@@ -670,7 +680,6 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     flexDirection: 'row',
-    gap: 8,
   },
   input: {
     flex: 1,
