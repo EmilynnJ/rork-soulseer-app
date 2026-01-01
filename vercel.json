@@ -25,7 +25,6 @@
   ],
   "functions": {
     "api/backend.ts": {
-      "runtime": "nodejs20.x",
       "maxDuration": 60
     }
   }
