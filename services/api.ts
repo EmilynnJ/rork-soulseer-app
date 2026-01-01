@@ -10,7 +10,14 @@ import {
   ApiResponse,
 } from '@/types/api';
 
-const API_BASE_URL = process.env.EXPO_PUBLIC_RORK_API_BASE_URL || '';
+const getApiBaseUrl = () => {
+  if (typeof window !== 'undefined') {
+    return window.location.origin;
+  }
+  return process.env.EXPO_PUBLIC_RORK_API_BASE_URL || '';
+};
+
+const API_BASE_URL = getApiBaseUrl();
 
 class ApiService {
   private async request<T>(
