@@ -97,6 +97,7 @@ export interface ReaderEarnings {
 
 export interface ApiResponse<T> {
   data: T;
+  success: boolean;
   error?: string;
   message?: string;
 }

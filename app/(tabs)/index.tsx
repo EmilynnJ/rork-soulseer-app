@@ -15,8 +15,7 @@ import { Colors } from '@/constants/colors';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Header } from '@/components/Header';
 import { Eye, ShoppingBag, Users, Mail, Star, Heart, MessageCircle, ArrowRight } from 'lucide-react-native';
-import { useQuery, useMutation } from '@tanstack/react-query';
-import { apiService } from '@/services/api';
+import { trpc } from '@/lib/trpc';
 import { Reader, LiveStream, Product, CommunityPost } from '@/types/api';
 
 const BACKGROUND_IMAGE =
@@ -27,28 +26,15 @@ export default function HomeScreen() {
   const router = useRouter();
   const [email, setEmail] = useState('');
 
-  const { data: onlineReaders = [], isLoading: loadingReaders } = useQuery({
-    queryKey: ['readers', 'online'],
-    queryFn: () => apiService.getOnlineReaders(),
-  });
+  const { data: onlineReaders = [], isLoading: loadingReaders } = trpc.readers.getOnline.useQuery();
 
-  const { data: streams = [], isLoading: loadingStreams } = useQuery({
-    queryKey: ['streams', 'live'],
-    queryFn: () => apiService.getLiveStreams(),
-  });
+  const { data: streams = [], isLoading: loadingStreams } = trpc.streams.getLive.useQuery();
 
-  const { data: products = [], isLoading: loadingProducts } = useQuery({
-    queryKey: ['products', 'featured'],
-    queryFn: () => apiService.getProducts(),
-  });
+  const { data: products = [], isLoading: loadingProducts } = trpc.products.getAll.useQuery();
 
-  const { data: communityPosts = [], isLoading: loadingCommunity } = useQuery({
-    queryKey: ['community', 'highlights'],
-    queryFn: () => apiService.getCommunityPosts(4),
-  });
+  const { data: communityPosts = [], isLoading: loadingCommunity } = trpc.community.getPosts.useQuery({ limit: 4 });
 
-  const newsletterMutation = useMutation({
-    mutationFn: (email: string) => apiService.subscribeToNewsletter(email),
+  const newsletterMutation = trpc.newsletter.subscribe.useMutation({
     onSuccess: () => {
       setEmail('');
       console.log('Successfully subscribed to newsletter');
@@ -60,7 +46,7 @@ export default function HomeScreen() {
 
   const handleNewsletterSignup = () => {
     if (email.trim()) {
-      newsletterMutation.mutate(email.trim());
+      newsletterMutation.mutate({ email: email.trim() });
     }
   };
 

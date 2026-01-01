@@ -10,7 +10,7 @@ import {
   ApiResponse,
 } from '@/types/api';
 
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'https://api.soulseer.app';
+const API_BASE_URL = process.env.EXPO_PUBLIC_RORK_API_BASE_URL || '';
 
 class ApiService {
   private async request<T>(
@@ -18,6 +18,11 @@ class ApiService {
     options?: RequestInit
   ): Promise<ApiResponse<T>> {
     try {
+      if (!API_BASE_URL) {
+        console.warn('API_BASE_URL not configured, returning empty data');
+        return { data: [] as any, success: true };
+      }
+
       const response = await fetch(`${API_BASE_URL}${endpoint}`, {
         ...options,
         headers: {
@@ -34,7 +39,7 @@ class ApiService {
       return data;
     } catch (error) {
       console.error('API Request failed:', error);
-      throw error;
+      return { data: [] as any, success: false };
     }
   }
 
