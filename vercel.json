@@ -4,12 +4,8 @@
   "framework": null,
   "rewrites": [
     {
-      "source": "/backend/:path*",
-      "destination": "/backend/hono"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/index.html"
+      "source": "/api/:path*",
+      "destination": "/api/backend"
     }
   ],
   "headers": [
@@ -28,8 +24,9 @@
     }
   ],
   "functions": {
-    "backend/hono.ts": {
-      "runtime": "nodejs20.x"
+    "api/backend.ts": {
+      "runtime": "nodejs20.x",
+      "maxDuration": 60
     }
   }
 }
