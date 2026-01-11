@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Switch, Platform, ActivityIndicator } from 'react-native';
 import { Image } from 'expo-image';
+import { useRouter } from 'expo-router';
 import { Header } from '@/components/Header';
 import { Colors } from '@/constants/colors';
 import { 
@@ -16,14 +17,17 @@ import {
   Video, 
   Phone, 
   User as UserIcon,
-  RefreshCw
+  RefreshCw,
+  Plus,
+  Edit
 } from 'lucide-react-native';
 import { useUser } from '@/context/UserContext';
 import { useQuery } from '@tanstack/react-query';
 import { apiService } from '@/services/api';
 
 export default function DashboardScreen() {
-  const { user, isLoading: userLoading, toggleRole, isReaderOnline, toggleOnlineStatus, addFunds } = useUser();
+  const router = useRouter();
+  const { user, isLoading: userLoading, toggleRole, isReaderOnline, toggleOnlineStatus } = useUser();
 
   const { data: readerEarnings } = useQuery({
     queryKey: ['reader', 'earnings', user?.id],
@@ -48,8 +52,12 @@ export default function DashboardScreen() {
       <View style={styles.balanceCard}>
         <Text style={styles.balanceLabel}>Current Balance</Text>
         <Text style={styles.balanceAmount}>${user.balance.toFixed(2)}</Text>
-        <TouchableOpacity style={styles.addFundsButton} onPress={() => addFunds(10)}>
-          <Text style={styles.addFundsText}>Add Funds (+$10)</Text>
+        <TouchableOpacity 
+          style={styles.addFundsButton} 
+          onPress={() => router.push('/wallet/add-funds' as any)}
+        >
+          <Plus size={16} color={Colors.dark.tint} />
+          <Text style={styles.addFundsText}>Add Funds</Text>
         </TouchableOpacity>
       </View>
 
@@ -64,7 +72,10 @@ export default function DashboardScreen() {
           <ChevronRight size={20} color="rgba(255,255,255,0.3)" />
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.menuItem}>
+        <TouchableOpacity 
+          style={styles.menuItem}
+          onPress={() => router.push('/wallet/transactions' as any)}
+        >
           <View style={styles.menuItemLeft}>
             <Clock size={20} color={Colors.dark.text} />
             <Text style={styles.menuItemText}>Transaction History</Text>
@@ -180,7 +191,21 @@ export default function DashboardScreen() {
         <View style={styles.menuSection}>
           <Text style={styles.menuTitle}>Settings</Text>
           
-          <TouchableOpacity style={styles.menuItem}>
+          <TouchableOpacity 
+            style={styles.menuItem}
+            onPress={() => router.push('/profile/edit' as any)}
+          >
+            <View style={styles.menuItemLeft}>
+              <Edit size={20} color={Colors.dark.text} />
+              <Text style={styles.menuItemText}>Edit Profile</Text>
+            </View>
+            <ChevronRight size={20} color="rgba(255,255,255,0.3)" />
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={styles.menuItem}
+            onPress={() => router.push('/settings' as any)}
+          >
             <View style={styles.menuItemLeft}>
               <Settings size={20} color={Colors.dark.text} />
               <Text style={styles.menuItemText}>Preferences</Text>
@@ -197,7 +222,10 @@ export default function DashboardScreen() {
             </View>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.menuItem}>
+          <TouchableOpacity 
+            style={styles.menuItem}
+            onPress={() => router.replace('/auth/login' as any)}
+          >
             <View style={styles.menuItemLeft}>
               <LogOut size={20} color="#FF453A" />
               <Text style={[styles.menuItemText, { color: '#FF453A' }]}>Log Out</Text>
@@ -295,16 +323,20 @@ const styles = StyleSheet.create({
     fontFamily: 'PlayfairDisplay_700Bold',
   },
   addFundsButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: 'rgba(255, 105, 180, 0.15)',
-    paddingHorizontal: 32,
-    paddingVertical: 10,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
     borderRadius: 20,
     borderWidth: 1,
     borderColor: Colors.dark.tint,
+    gap: 8,
   },
   addFundsText: {
     color: Colors.dark.tint,
-    fontWeight: 'bold',
+    fontWeight: 'bold' as const,
+    fontSize: 14,
   },
   statusCard: {
     backgroundColor: Colors.dark.card,

@@ -1,21 +1,24 @@
 import React from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
-import { X, Home, Eye, Video, ShoppingBag, Users, MessageCircle, User, HelpCircle, FileText } from 'lucide-react-native';
+import { X, Home, Eye, Video, ShoppingBag, Users, MessageCircle, User, HelpCircle, FileText, Info, Settings, Wallet } from 'lucide-react-native';
 import { Colors } from '@/constants/colors';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
 
 const MENU_ITEMS = [
-  { label: 'Home', icon: Home, route: '/' },
-  { label: 'Readings', icon: Eye, route: '/readings' },
-  { label: 'Live Streams', icon: Video, route: '/live' },
-  { label: 'Shop', icon: ShoppingBag, route: '/shop' },
-  { label: 'Community', icon: Users, route: '/community' },
-  { label: 'Messages', icon: MessageCircle, route: '/messages' },
-  { label: 'Dashboard', icon: User, route: '/dashboard' },
-  { label: 'Help Center', icon: HelpCircle, route: '/help' },
-  { label: 'Policies', icon: FileText, route: '/policies' },
+  { label: 'Home', icon: Home, route: '/', isTab: true },
+  { label: 'Readings', icon: Eye, route: '/readings', isTab: true },
+  { label: 'Live Streams', icon: Video, route: '/live', isTab: true },
+  { label: 'Shop', icon: ShoppingBag, route: '/shop', isTab: false },
+  { label: 'Community', icon: Users, route: '/community', isTab: false },
+  { label: 'Messages', icon: MessageCircle, route: '/messages', isTab: true },
+  { label: 'Dashboard', icon: User, route: '/dashboard', isTab: true },
+  { label: 'Wallet', icon: Wallet, route: '/wallet/add-funds', isTab: false },
+  { label: 'Settings', icon: Settings, route: '/settings', isTab: false },
+  { label: 'About Us', icon: Info, route: '/about', isTab: false },
+  { label: 'Help Center', icon: HelpCircle, route: '/help', isTab: false },
+  { label: 'Policies', icon: FileText, route: '/policies', isTab: false },
 ];
 
 export default function MenuScreen() {
@@ -38,17 +41,16 @@ export default function MenuScreen() {
             key={index}
             style={styles.menuItem}
             onPress={() => {
-              // Handle special cases or simply push
-              if (item.route === '/') {
-                router.dismissAll();
-                router.push('/(tabs)');
-              } else if (['/readings', '/live', '/messages', '/dashboard'].includes(item.route)) {
-                 // For tabs, we want to go to the tab
-                 router.dismissAll();
-                 router.push(`/(tabs)${item.route}` as any);
-              } else {
-                router.push(item.route as any);
-              }
+              router.back();
+              setTimeout(() => {
+                if (item.route === '/') {
+                  router.push('/(tabs)');
+                } else if (item.isTab) {
+                  router.push(`/(tabs)${item.route}` as any);
+                } else {
+                  router.push(item.route as any);
+                }
+              }, 100);
             }}
           >
             <item.icon color={Colors.dark.tint} size={24} style={styles.menuIcon} />

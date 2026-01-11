@@ -29,6 +29,21 @@ function RootLayoutNav() {
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen name="menu" options={{ presentation: 'modal', animation: 'fade_from_bottom' }} />
       <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
+      <Stack.Screen name="about" options={{ animation: 'slide_from_right' }} />
+      <Stack.Screen name="auth/login" options={{ animation: 'fade' }} />
+      <Stack.Screen name="auth/signup" options={{ animation: 'slide_from_right' }} />
+      <Stack.Screen name="reader/[id]" options={{ animation: 'slide_from_right' }} />
+      <Stack.Screen name="reading/[id]" options={{ animation: 'slide_from_bottom', presentation: 'fullScreenModal' }} />
+      <Stack.Screen name="chat/[id]" options={{ animation: 'slide_from_right' }} />
+      <Stack.Screen name="stream/[id]" options={{ animation: 'slide_from_bottom', presentation: 'fullScreenModal' }} />
+      <Stack.Screen name="wallet/add-funds" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
+      <Stack.Screen name="wallet/transactions" options={{ animation: 'slide_from_right' }} />
+      <Stack.Screen name="settings/index" options={{ animation: 'slide_from_right' }} />
+      <Stack.Screen name="profile/edit" options={{ animation: 'slide_from_right' }} />
+      <Stack.Screen name="shop/index" options={{ animation: 'slide_from_right' }} />
+      <Stack.Screen name="community/index" options={{ animation: 'slide_from_right' }} />
+      <Stack.Screen name="help" options={{ animation: 'slide_from_right' }} />
+      <Stack.Screen name="policies" options={{ animation: 'slide_from_right' }} />
       <Stack.Screen name="+not-found" />
     </Stack>
   );
