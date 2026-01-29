@@ -16,18 +16,19 @@ import { Colors } from '@/constants/colors';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Eye, EyeOff, Mail, Lock, User, ArrowRight, ArrowLeft } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useAuth } from '@/context/AuthContext';
 
 const BACKGROUND_IMAGE = 'https://i.postimg.cc/sXdsKGTK/DALL-E-2025-06-06-14-36-29-A-vivid-ethereal-background-image-designed-for-a-psychic-reading-app.webp';
 
 export default function SignupScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { register, isRegistering, registerError } = useAuth();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [agreed, setAgreed] = useState(false);
 
@@ -53,16 +54,14 @@ export default function SignupScreen() {
     }
 
     setError('');
-    setIsLoading(true);
     
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      console.log('Signup attempt:', { name, email });
+      await register(email.trim(), password, name.trim());
+      console.log('Signup successful for:', email);
       router.replace('/(tabs)');
-    } catch {
-      setError('Failed to create account');
-    } finally {
-      setIsLoading(false);
+    } catch (err) {
+      console.error('Signup error:', err);
+      setError(err instanceof Error ? err.message : 'Failed to create account');
     }
   };
 
@@ -100,9 +99,9 @@ export default function SignupScreen() {
             <Text style={styles.welcomeText}>Create Account</Text>
             <Text style={styles.subtitleText}>Join our community of seekers</Text>
 
-            {error ? (
+            {(error || registerError) ? (
               <View style={styles.errorContainer}>
-                <Text style={styles.errorText}>{error}</Text>
+                <Text style={styles.errorText}>{error || registerError}</Text>
               </View>
             ) : null}
 
@@ -186,9 +185,9 @@ export default function SignupScreen() {
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[styles.signupButton, isLoading && styles.signupButtonDisabled]}
+              style={[styles.signupButton, isRegistering && styles.signupButtonDisabled]}
               onPress={handleSignup}
-              disabled={isLoading}
+              disabled={isRegistering}
             >
               <LinearGradient
                 colors={[Colors.dark.tint, '#D84A8C']}
@@ -196,7 +195,7 @@ export default function SignupScreen() {
                 end={{ x: 1, y: 0 }}
                 style={styles.signupGradient}
               >
-                {isLoading ? (
+                {isRegistering ? (
                   <ActivityIndicator color="white" />
                 ) : (
                   <>

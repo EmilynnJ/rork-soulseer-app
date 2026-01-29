@@ -27,6 +27,7 @@ import {
   Smartphone,
   Volume2,
 } from 'lucide-react-native';
+import { useAuth } from '@/context/AuthContext';
 
 type SettingItemProps = {
   icon: React.ReactNode;
@@ -77,10 +78,16 @@ const SettingItem = ({
 export default function SettingsScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { user, logout, isAuthenticated } = useAuth();
 
   const [notifications, setNotifications] = useState(true);
   const [darkMode, setDarkMode] = useState(true);
   const [sounds, setSounds] = useState(true);
+
+  const handleLogout = async () => {
+    await logout();
+    router.replace('/auth/login');
+  };
 
   return (
     <View style={styles.container}>
@@ -175,18 +182,30 @@ export default function SettingsScreen() {
           />
         </View>
 
-        <View style={[styles.section, styles.dangerSection]}>
-          <SettingItem
-            icon={<LogOut size={20} color="#FF3B30" />}
-            label="Log Out"
-            onPress={() => {
-              console.log('Logout');
-              router.replace('/auth/login');
-            }}
-            showArrow={false}
-            danger
-          />
-        </View>
+        {isAuthenticated ? (
+          <View style={[styles.section, styles.dangerSection]}>
+            <SettingItem
+              icon={<LogOut size={20} color="#FF3B30" />}
+              label="Log Out"
+              onPress={handleLogout}
+              showArrow={false}
+              danger
+            />
+          </View>
+        ) : (
+          <View style={[styles.section, styles.dangerSection]}>
+            <SettingItem
+              icon={<LogOut size={20} color={Colors.dark.tint} />}
+              label="Sign In"
+              onPress={() => router.push('/auth/login')}
+              showArrow={false}
+            />
+          </View>
+        )}
+
+        {user && (
+          <Text style={styles.userInfo}>Signed in as {user.email} ({user.role})</Text>
+        )}
 
         <Text style={styles.versionText}>SoulSeer v1.0.0</Text>
       </ScrollView>
@@ -280,5 +299,11 @@ const styles = StyleSheet.create({
     fontSize: 12,
     textAlign: 'center',
     marginTop: 32,
+  },
+  userInfo: {
+    color: 'rgba(255,255,255,0.4)',
+    fontSize: 12,
+    textAlign: 'center',
+    marginTop: 16,
   },
 });

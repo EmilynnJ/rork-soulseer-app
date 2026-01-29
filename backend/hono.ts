@@ -17,7 +17,49 @@ app.use(
   }),
 );
 
+const ADMIN_EMAIL = "emilynnj14@gmail.com";
+const ADMIN_PASSWORD = "Jade2014!";
+
+const USERS_DB: Record<string, { id: string; email: string; password: string; name: string; role: 'client' | 'reader' | 'admin'; avatar: string; balance: number; readerId?: string }> = {
+  "emilynnj14@gmail.com": {
+    id: "admin-1",
+    email: "emilynnj14@gmail.com",
+    password: "Jade2014!",
+    name: "Admin",
+    role: "admin",
+    avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&fit=crop",
+    balance: 0,
+  },
+  "emilynn992@gmail.com": {
+    id: "reader-emilynn",
+    email: "emilynn992@gmail.com",
+    password: "Jade2014!",
+    name: "Emilynn",
+    role: "reader",
+    avatar: "https://i.postimg.cc/s2ds9RtC/FOUNDER.jpg",
+    balance: 0,
+    readerId: "reader-emilynn",
+  },
+};
+
 const mockReaders = [
+  {
+    id: "reader-emilynn",
+    name: "Emilynn",
+    avatar: "https://i.postimg.cc/s2ds9RtC/FOUNDER.jpg",
+    specialty: "Psychic Medium & Founder",
+    rating: 5.0,
+    reviewCount: 512,
+    pricePerMin: 6.99,
+    pricePerMinChat: 5.99,
+    pricePerMinVoice: 6.99,
+    pricePerMinVideo: 8.99,
+    isOnline: true,
+    bio: "Founder of SoulSeer and experienced psychic medium. I created this platform to provide ethical, compassionate, and judgment-free spiritual guidance.",
+    skills: ["Psychic Medium", "Tarot", "Clairvoyance", "Energy Reading"],
+    languages: ["English"],
+    totalReadings: 4200,
+  },
   {
     id: "reader-1",
     name: "Luna Starweaver",
@@ -248,7 +290,96 @@ app.get("/api/messages/:userId", (c) => {
   return c.json({ data: [], success: true });
 });
 
+app.post("/api/auth/login", async (c) => {
+  try {
+    const body = await c.req.json();
+    const { email, password } = body;
+    
+    const user = USERS_DB[email.toLowerCase()];
+    
+    if (!user || user.password !== password) {
+      return c.json({ success: false, error: "Invalid email or password" }, 401);
+    }
+    
+    const sessionToken = `session_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    
+    return c.json({
+      success: true,
+      data: {
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+          avatar: user.avatar,
+          balance: user.balance,
+          createdAt: new Date().toISOString(),
+          readerId: user.readerId,
+        },
+        token: sessionToken,
+      },
+    });
+  } catch (error) {
+    console.error("Login error:", error);
+    return c.json({ success: false, error: "Login failed" }, 500);
+  }
+});
+
+app.post("/api/auth/register", async (c) => {
+  try {
+    const body = await c.req.json();
+    const { email, password, name } = body;
+    
+    if (USERS_DB[email.toLowerCase()]) {
+      return c.json({ success: false, error: "Email already registered" }, 400);
+    }
+    
+    const newUser = {
+      id: `user-${Date.now()}`,
+      email: email.toLowerCase(),
+      password,
+      name,
+      role: "client" as const,
+      avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&fit=crop",
+      balance: 0,
+    };
+    
+    USERS_DB[email.toLowerCase()] = newUser;
+    
+    const sessionToken = `session_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    
+    return c.json({
+      success: true,
+      data: {
+        user: {
+          id: newUser.id,
+          name: newUser.name,
+          email: newUser.email,
+          role: newUser.role,
+          avatar: newUser.avatar,
+          balance: newUser.balance,
+          createdAt: new Date().toISOString(),
+        },
+        token: sessionToken,
+      },
+    });
+  } catch (error) {
+    console.error("Register error:", error);
+    return c.json({ success: false, error: "Registration failed" }, 500);
+  }
+});
+
 app.get("/api/auth/me", (c) => {
+  const authHeader = c.req.header("Authorization");
+  
+  if (!authHeader) {
+    return c.json({ 
+      data: null,
+      success: false,
+      error: "Not authenticated"
+    }, 401);
+  }
+  
   return c.json({ 
     data: {
       id: "user-1",

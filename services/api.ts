@@ -10,6 +10,11 @@ import {
   ApiResponse,
 } from '@/types/api';
 
+export interface AuthResponse {
+  user: User & { readerId?: string };
+  token: string;
+}
+
 const getApiBaseUrl = () => {
   if (typeof window !== 'undefined') {
     return window.location.origin;
@@ -141,6 +146,20 @@ class ApiService {
     await this.request<void>('/api/newsletter/subscribe', {
       method: 'POST',
       body: JSON.stringify({ email }),
+    });
+  }
+
+  async login(email: string, password: string): Promise<ApiResponse<AuthResponse>> {
+    return this.request<AuthResponse>('/api/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ email, password }),
+    });
+  }
+
+  async register(email: string, password: string, name: string): Promise<ApiResponse<AuthResponse>> {
+    return this.request<AuthResponse>('/api/auth/register', {
+      method: 'POST',
+      body: JSON.stringify({ email, password, name }),
     });
   }
 }

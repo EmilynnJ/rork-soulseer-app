@@ -16,16 +16,17 @@ import { Colors } from '@/constants/colors';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Eye, EyeOff, Mail, Lock, ArrowRight } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useAuth } from '@/context/AuthContext';
 
 const BACKGROUND_IMAGE = 'https://i.postimg.cc/sXdsKGTK/DALL-E-2025-06-06-14-36-29-A-vivid-ethereal-background-image-designed-for-a-psychic-reading-app.webp';
 
 export default function LoginScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { login, isLoggingIn, loginError } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
   const handleLogin = async () => {
@@ -35,16 +36,14 @@ export default function LoginScreen() {
     }
 
     setError('');
-    setIsLoading(true);
     
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      console.log('Login attempt:', { email });
+      await login(email.trim(), password);
+      console.log('Login successful for:', email);
       router.replace('/(tabs)');
-    } catch {
-      setError('Invalid email or password');
-    } finally {
-      setIsLoading(false);
+    } catch (err) {
+      console.error('Login error:', err);
+      setError(err instanceof Error ? err.message : 'Invalid email or password');
     }
   };
 
@@ -75,9 +74,9 @@ export default function LoginScreen() {
             <Text style={styles.welcomeText}>Welcome Back</Text>
             <Text style={styles.subtitleText}>Sign in to continue your journey</Text>
 
-            {error ? (
+            {(error || loginError) ? (
               <View style={styles.errorContainer}>
-                <Text style={styles.errorText}>{error}</Text>
+                <Text style={styles.errorText}>{error || loginError}</Text>
               </View>
             ) : null}
 
@@ -122,9 +121,9 @@ export default function LoginScreen() {
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[styles.loginButton, isLoading && styles.loginButtonDisabled]}
+              style={[styles.loginButton, isLoggingIn && styles.loginButtonDisabled]}
               onPress={handleLogin}
-              disabled={isLoading}
+              disabled={isLoggingIn}
             >
               <LinearGradient
                 colors={[Colors.dark.tint, '#D84A8C']}
@@ -132,7 +131,7 @@ export default function LoginScreen() {
                 end={{ x: 1, y: 0 }}
                 style={styles.loginGradient}
               >
-                {isLoading ? (
+                {isLoggingIn ? (
                   <ActivityIndicator color="white" />
                 ) : (
                   <>

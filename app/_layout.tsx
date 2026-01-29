@@ -15,6 +15,7 @@ import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { UserContext } from '@/context/UserContext';
+import { AuthProvider } from '@/context/AuthContext';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { trpc, trpcClient } from '@/lib/trpc';
 
@@ -84,12 +85,14 @@ export default function RootLayout() {
     <ErrorBoundary>
       <trpc.Provider client={trpcClient} queryClient={queryClient}>
         <QueryClientProvider client={queryClient}>
-          <UserContext>
+          <AuthProvider>
+            <UserContext>
             <GestureHandlerRootView style={{ flex: 1 }}>
               <StatusBar style="light" />
               <RootLayoutNav />
             </GestureHandlerRootView>
           </UserContext>
+            </AuthProvider>
         </QueryClientProvider>
       </trpc.Provider>
     </ErrorBoundary>
