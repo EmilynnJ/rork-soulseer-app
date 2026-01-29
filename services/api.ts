@@ -26,7 +26,7 @@ class ApiService {
   ): Promise<ApiResponse<T>> {
     try {
       if (!API_BASE_URL) {
-        console.warn('API_BASE_URL not configured, returning empty data');
+        console.warn('API_BASE_URL not configured, returning mock data');
         return { data: [] as any, success: true };
       }
 
@@ -38,8 +38,16 @@ class ApiService {
         },
       });
 
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        console.warn(`API returned non-JSON response for ${endpoint}, using fallback`);
+        return { data: [] as any, success: false };
+      }
+
       if (!response.ok) {
-        throw new Error(`API Error: ${response.statusText}`);
+        const errorText = await response.text();
+        console.error(`API Error ${response.status}: ${errorText}`);
+        return { data: [] as any, success: false };
       }
 
       const data = await response.json();
