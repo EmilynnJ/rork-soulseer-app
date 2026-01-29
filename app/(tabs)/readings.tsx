@@ -26,7 +26,7 @@ export default function ReadingsScreen() {
           <View style={styles.ratingRow}>
             <Text style={styles.ratingStar}>★</Text>
             <Text style={styles.ratingText}>
-              {item.rating} ({item.reviews})
+              {item.rating} ({item.reviewCount})
             </Text>
           </View>
         </View>
@@ -40,7 +40,7 @@ export default function ReadingsScreen() {
           </TouchableOpacity>
         </View>
       </View>
-      <Text style={styles.description} numberOfLines={2}>{item.description}</Text>
+      <Text style={styles.description} numberOfLines={2}>{item.bio}</Text>
       {item.isOnline && (
         <View style={styles.onlineIndicator} />
       )}
