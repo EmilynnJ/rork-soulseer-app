@@ -51,60 +51,60 @@ class ApiService {
   }
 
   async getOnlineReaders(): Promise<Reader[]> {
-    const response = await this.request<Reader[]>('/readers/online');
+    const response = await this.request<Reader[]>('/api/readers/online');
     return response.data;
   }
 
   async getAllReaders(): Promise<Reader[]> {
-    const response = await this.request<Reader[]>('/readers');
+    const response = await this.request<Reader[]>('/api/readers');
     return response.data;
   }
 
   async getReaderById(id: string): Promise<Reader> {
-    const response = await this.request<Reader>(`/readers/${id}`);
+    const response = await this.request<Reader>(`/api/readers/${id}`);
     return response.data;
   }
 
   async getLiveStreams(): Promise<LiveStream[]> {
-    const response = await this.request<LiveStream[]>('/streams/live');
+    const response = await this.request<LiveStream[]>('/api/streams/live');
     return response.data;
   }
 
   async getProducts(category?: string): Promise<Product[]> {
     const query = category ? `?category=${category}` : '';
-    const response = await this.request<Product[]>(`/products${query}`);
+    const response = await this.request<Product[]>(`/api/products${query}`);
     return response.data;
   }
 
   async getCommunityPosts(limit?: number): Promise<CommunityPost[]> {
     const query = limit ? `?limit=${limit}` : '';
-    const response = await this.request<CommunityPost[]>(`/community/posts${query}`);
+    const response = await this.request<CommunityPost[]>(`/api/community/posts${query}`);
     return response.data;
   }
 
   async getMessages(userId: string): Promise<Message[]> {
-    const response = await this.request<Message[]>(`/messages/${userId}`);
+    const response = await this.request<Message[]>(`/api/messages/${userId}`);
     return response.data;
   }
 
   async getCurrentUser(): Promise<User> {
-    const response = await this.request<User>('/auth/me');
+    const response = await this.request<User>('/api/auth/me');
     return response.data;
   }
 
   async getReaderEarnings(readerId: string): Promise<ReaderEarnings> {
-    const response = await this.request<ReaderEarnings>(`/readers/${readerId}/earnings`);
+    const response = await this.request<ReaderEarnings>(`/api/readers/${readerId}/earnings`);
     return response.data;
   }
 
   async getTransactions(userId: string, limit?: number): Promise<Transaction[]> {
     const query = limit ? `?limit=${limit}` : '';
-    const response = await this.request<Transaction[]>(`/users/${userId}/transactions${query}`);
+    const response = await this.request<Transaction[]>(`/api/users/${userId}/transactions${query}`);
     return response.data;
   }
 
   async addFunds(userId: string, amount: number): Promise<Transaction> {
-    const response = await this.request<Transaction>('/payments/add-funds', {
+    const response = await this.request<Transaction>('/api/payments/add-funds', {
       method: 'POST',
       body: JSON.stringify({ userId, amount }),
     });
@@ -112,14 +112,14 @@ class ApiService {
   }
 
   async updateReaderStatus(readerId: string, isOnline: boolean): Promise<void> {
-    await this.request<void>('/readers/status', {
+    await this.request<void>('/api/readers/status', {
       method: 'PUT',
       body: JSON.stringify({ readerId, isOnline }),
     });
   }
 
   async subscribeToNewsletter(email: string): Promise<void> {
-    await this.request<void>('/newsletter/subscribe', {
+    await this.request<void>('/api/newsletter/subscribe', {
       method: 'POST',
       body: JSON.stringify({ email }),
     });

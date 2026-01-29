@@ -199,16 +199,16 @@ const mockCommunityPosts = [
   },
 ];
 
-app.get("/readers/online", (c) => {
+app.get("/api/readers/online", (c) => {
   const onlineReaders = mockReaders.filter(r => r.isOnline);
   return c.json({ data: onlineReaders, success: true });
 });
 
-app.get("/readers", (c) => {
+app.get("/api/readers", (c) => {
   return c.json({ data: mockReaders, success: true });
 });
 
-app.get("/readers/:id", (c) => {
+app.get("/api/readers/:id", (c) => {
   const id = c.req.param("id");
   const reader = mockReaders.find(r => r.id === id);
   if (reader) {
@@ -217,11 +217,11 @@ app.get("/readers/:id", (c) => {
   return c.json({ data: null, success: false, error: "Reader not found" }, 404);
 });
 
-app.get("/streams/live", (c) => {
+app.get("/api/streams/live", (c) => {
   return c.json({ data: mockStreams, success: true });
 });
 
-app.get("/streams/:id", (c) => {
+app.get("/api/streams/:id", (c) => {
   const id = c.req.param("id");
   const stream = mockStreams.find(s => s.id === id);
   if (stream) {
@@ -230,7 +230,7 @@ app.get("/streams/:id", (c) => {
   return c.json({ data: null, success: false, error: "Stream not found" }, 404);
 });
 
-app.get("/products", (c) => {
+app.get("/api/products", (c) => {
   const category = c.req.query("category");
   const products = category 
     ? mockProducts.filter(p => p.category === category)
@@ -238,17 +238,17 @@ app.get("/products", (c) => {
   return c.json({ data: products, success: true });
 });
 
-app.get("/community/posts", (c) => {
+app.get("/api/community/posts", (c) => {
   const limitStr = c.req.query("limit");
   const limit = limitStr ? parseInt(limitStr, 10) : mockCommunityPosts.length;
   return c.json({ data: mockCommunityPosts.slice(0, limit), success: true });
 });
 
-app.get("/messages/:userId", (c) => {
+app.get("/api/messages/:userId", (c) => {
   return c.json({ data: [], success: true });
 });
 
-app.get("/auth/me", (c) => {
+app.get("/api/auth/me", (c) => {
   return c.json({ 
     data: {
       id: "user-1",
@@ -263,7 +263,7 @@ app.get("/auth/me", (c) => {
   });
 });
 
-app.get("/readers/:id/earnings", (c) => {
+app.get("/api/readers/:id/earnings", (c) => {
   return c.json({ 
     data: {
       todayEarnings: 125.50,
@@ -275,11 +275,11 @@ app.get("/readers/:id/earnings", (c) => {
   });
 });
 
-app.get("/users/:userId/transactions", (c) => {
+app.get("/api/users/:userId/transactions", (c) => {
   return c.json({ data: [], success: true });
 });
 
-app.post("/payments/add-funds", async (c) => {
+app.post("/api/payments/add-funds", async (c) => {
   const body = await c.req.json();
   return c.json({ 
     data: {
@@ -295,15 +295,15 @@ app.post("/payments/add-funds", async (c) => {
   });
 });
 
-app.put("/readers/status", async (c) => {
+app.put("/api/readers/status", async (c) => {
   return c.json({ success: true });
 });
 
-app.post("/newsletter/subscribe", async (c) => {
+app.post("/api/newsletter/subscribe", async (c) => {
   return c.json({ success: true, message: "Subscribed successfully" });
 });
 
-app.get("/", (c) => {
+app.get("/api", (c) => {
   return c.json({ status: "ok", message: "SoulSeer API is running" });
 });
 
