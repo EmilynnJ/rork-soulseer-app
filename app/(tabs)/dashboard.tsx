@@ -22,12 +22,15 @@ import {
   Edit
 } from 'lucide-react-native';
 import { useUser } from '@/context/UserContext';
+import { useAuth } from '@/context/AuthContext';
 import { useQuery } from '@tanstack/react-query';
 import { apiService } from '@/services/api';
+import { trpc } from '@/lib/trpc';
 
 export default function DashboardScreen() {
   const router = useRouter();
-  const { user, isLoading: userLoading, toggleRole, isReaderOnline, toggleOnlineStatus } = useUser();
+  const { user, isLoading: userLoading, toggleRole, isReaderOnline, toggleOnlineStatus, logout } = useUser();
+  const { isAdmin } = useAuth();
 
   const { data: readerEarnings } = useQuery({
     queryKey: ['reader', 'earnings', user?.id],
@@ -87,6 +90,112 @@ export default function DashboardScreen() {
           <View style={styles.menuItemLeft}>
             <CreditCard size={20} color={Colors.dark.text} />
             <Text style={styles.menuItemText}>Payment Methods</Text>
+          </View>
+          <ChevronRight size={20} color="rgba(255,255,255,0.3)" />
+        </TouchableOpacity>
+      </View>
+    </>
+  );
+
+  const renderAdminDashboard = () => (
+    <>
+      <View style={styles.adminBanner}>
+        <View style={styles.adminBadge}>
+          <Settings size={16} color="white" />
+          <Text style={styles.adminBadgeText}>ADMIN</Text>
+        </View>
+        <Text style={styles.adminWelcome}>Admin Control Panel</Text>
+      </View>
+
+      <View style={styles.adminStatsContainer}>
+        <View style={styles.adminStatCard}>
+          <BarChart size={24} color={Colors.dark.tint} />
+          <Text style={styles.adminStatValue}>--</Text>
+          <Text style={styles.adminStatLabel}>Total Users</Text>
+        </View>
+        <View style={styles.adminStatCard}>
+          <UserIcon size={24} color={Colors.dark.tint} />
+          <Text style={styles.adminStatValue}>--</Text>
+          <Text style={styles.adminStatLabel}>Active Readers</Text>
+        </View>
+        <View style={styles.adminStatCard}>
+          <DollarSign size={24} color={Colors.dark.tint} />
+          <Text style={styles.adminStatValue}>--</Text>
+          <Text style={styles.adminStatLabel}>Revenue</Text>
+        </View>
+      </View>
+
+      <View style={styles.menuSection}>
+        <Text style={styles.menuTitle}>User Management</Text>
+        
+        <TouchableOpacity style={styles.menuItem}>
+          <View style={styles.menuItemLeft}>
+            <UserIcon size={20} color={Colors.dark.text} />
+            <Text style={styles.menuItemText}>Manage Users</Text>
+          </View>
+          <ChevronRight size={20} color="rgba(255,255,255,0.3)" />
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.menuItem}>
+          <View style={styles.menuItemLeft}>
+            <Activity size={20} color={Colors.dark.text} />
+            <Text style={styles.menuItemText}>Manage Readers</Text>
+          </View>
+          <ChevronRight size={20} color="rgba(255,255,255,0.3)" />
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.menuItem}>
+          <View style={styles.menuItemLeft}>
+            <Video size={20} color={Colors.dark.text} />
+            <Text style={styles.menuItemText}>Manage Streams</Text>
+          </View>
+          <ChevronRight size={20} color="rgba(255,255,255,0.3)" />
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.menuSection}>
+        <Text style={styles.menuTitle}>Financial</Text>
+        
+        <TouchableOpacity style={styles.menuItem}>
+          <View style={styles.menuItemLeft}>
+            <DollarSign size={20} color={Colors.dark.text} />
+            <Text style={styles.menuItemText}>Revenue Reports</Text>
+          </View>
+          <ChevronRight size={20} color="rgba(255,255,255,0.3)" />
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.menuItem}>
+          <View style={styles.menuItemLeft}>
+            <CreditCard size={20} color={Colors.dark.text} />
+            <Text style={styles.menuItemText}>Payouts</Text>
+          </View>
+          <ChevronRight size={20} color="rgba(255,255,255,0.3)" />
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.menuItem}>
+          <View style={styles.menuItemLeft}>
+            <Clock size={20} color={Colors.dark.text} />
+            <Text style={styles.menuItemText}>Transaction History</Text>
+          </View>
+          <ChevronRight size={20} color="rgba(255,255,255,0.3)" />
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.menuSection}>
+        <Text style={styles.menuTitle}>Content</Text>
+        
+        <TouchableOpacity style={styles.menuItem}>
+          <View style={styles.menuItemLeft}>
+            <Calendar size={20} color={Colors.dark.text} />
+            <Text style={styles.menuItemText}>Community Posts</Text>
+          </View>
+          <ChevronRight size={20} color="rgba(255,255,255,0.3)" />
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.menuItem}>
+          <View style={styles.menuItemLeft}>
+            <BarChart size={20} color={Colors.dark.text} />
+            <Text style={styles.menuItemText}>Analytics</Text>
           </View>
           <ChevronRight size={20} color="rgba(255,255,255,0.3)" />
         </TouchableOpacity>
@@ -172,21 +281,21 @@ export default function DashboardScreen() {
 
   return (
     <View style={styles.container}>
-      <Header title={user.role === 'reader' ? 'Reader Dashboard' : 'My Profile'} showShop={true} />
+      <Header title={isAdmin ? 'Admin Dashboard' : user.role === 'reader' ? 'Reader Dashboard' : 'My Profile'} showShop={true} />
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.profileHeader}>
           <Image source={{ uri: user.avatar }} style={styles.avatar} />
           <View style={styles.userInfo}>
             <Text style={styles.userName}>{user.name}</Text>
             <Text style={styles.userEmail}>{user.email}</Text>
-            <View style={styles.roleBadge}>
+            <View style={[styles.roleBadge, isAdmin && styles.adminRoleBadge]}>
               <UserIcon size={12} color="white" />
-              <Text style={styles.roleText}>{user.role === 'reader' ? 'Verified Reader' : 'Client'}</Text>
+              <Text style={styles.roleText}>{isAdmin ? 'Administrator' : user.role === 'reader' ? 'Verified Reader' : 'Client'}</Text>
             </View>
           </View>
         </View>
 
-        {user.role === 'client' ? renderClientDashboard() : renderReaderDashboard()}
+        {isAdmin ? renderAdminDashboard() : user.role === 'reader' ? renderReaderDashboard() : renderClientDashboard()}
 
         <View style={styles.menuSection}>
           <Text style={styles.menuTitle}>Settings</Text>
@@ -213,18 +322,23 @@ export default function DashboardScreen() {
             <ChevronRight size={20} color="rgba(255,255,255,0.3)" />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.menuItem} onPress={toggleRole}>
-            <View style={styles.menuItemLeft}>
-              <RefreshCw size={20} color={Colors.dark.tint} />
-              <Text style={[styles.menuItemText, { color: Colors.dark.tint }]}>
-                Switch to {user.role === 'reader' ? 'Client' : 'Reader'} View
-              </Text>
-            </View>
-          </TouchableOpacity>
+          {!isAdmin && (
+            <TouchableOpacity style={styles.menuItem} onPress={toggleRole}>
+              <View style={styles.menuItemLeft}>
+                <RefreshCw size={20} color={Colors.dark.tint} />
+                <Text style={[styles.menuItemText, { color: Colors.dark.tint }]}>
+                  Switch to {user.role === 'reader' ? 'Client' : 'Reader'} View
+                </Text>
+              </View>
+            </TouchableOpacity>
+          )}
 
           <TouchableOpacity 
             style={styles.menuItem}
-            onPress={() => router.replace('/auth/login' as any)}
+            onPress={async () => {
+              await logout();
+              router.replace('/auth/login' as any);
+            }}
           >
             <View style={styles.menuItemLeft}>
               <LogOut size={20} color="#FF453A" />
@@ -419,5 +533,64 @@ const styles = StyleSheet.create({
   servicePrice: {
     color: Colors.dark.tint,
     fontWeight: 'bold',
+  },
+  adminBanner: {
+    backgroundColor: 'rgba(138, 43, 226, 0.2)',
+    borderRadius: 16,
+    padding: 20,
+    alignItems: 'center',
+    marginBottom: 24,
+    borderWidth: 1,
+    borderColor: 'rgba(138, 43, 226, 0.4)',
+  },
+  adminBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(138, 43, 226, 0.5)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    gap: 6,
+    marginBottom: 12,
+  },
+  adminBadgeText: {
+    color: 'white',
+    fontSize: 12,
+    fontWeight: 'bold',
+    letterSpacing: 1,
+  },
+  adminWelcome: {
+    color: 'white',
+    fontSize: 20,
+    fontFamily: 'PlayfairDisplay_700Bold',
+  },
+  adminStatsContainer: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 24,
+  },
+  adminStatCard: {
+    flex: 1,
+    backgroundColor: Colors.dark.card,
+    borderRadius: 12,
+    padding: 16,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: Colors.dark.border,
+  },
+  adminStatValue: {
+    color: 'white',
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginTop: 8,
+  },
+  adminStatLabel: {
+    color: 'rgba(255,255,255,0.6)',
+    fontSize: 10,
+    marginTop: 4,
+    textAlign: 'center',
+  },
+  adminRoleBadge: {
+    backgroundColor: 'rgba(138, 43, 226, 0.3)',
   },
 });
