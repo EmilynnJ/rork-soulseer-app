@@ -27,7 +27,7 @@ class ApiService {
     try {
       if (!API_BASE_URL) {
         console.warn('API_BASE_URL not configured, returning mock data');
-        return { data: [] as any, success: true };
+        return { data: [] as unknown as T, success: false };
       }
 
       const response = await fetch(`${API_BASE_URL}${endpoint}`, {
@@ -38,23 +38,34 @@ class ApiService {
         },
       });
 
-      const contentType = response.headers.get('content-type');
-      if (!contentType || !contentType.includes('application/json')) {
-        console.warn(`API returned non-JSON response for ${endpoint}, using fallback`);
-        return { data: [] as any, success: false };
+      const text = await response.text();
+      
+      if (!text || text.trim().length === 0) {
+        console.warn(`API returned empty response for ${endpoint}`);
+        return { data: [] as unknown as T, success: false };
+      }
+
+      if (text.trim().startsWith('<!DOCTYPE') || text.trim().startsWith('<html')) {
+        console.warn(`API returned HTML for ${endpoint}, server may be misconfigured`);
+        return { data: [] as unknown as T, success: false };
       }
 
       if (!response.ok) {
-        const errorText = await response.text();
-        console.error(`API Error ${response.status}: ${errorText}`);
-        return { data: [] as any, success: false };
+        console.error(`API Error ${response.status} for ${endpoint}:`, text.substring(0, 200));
+        return { data: [] as unknown as T, success: false };
       }
 
-      const data = await response.json();
-      return data;
+      try {
+        const data = JSON.parse(text);
+        return data;
+      } catch (parseError) {
+        console.error(`JSON parse error for ${endpoint}:`, parseError);
+        console.error('Response text:', text.substring(0, 200));
+        return { data: [] as unknown as T, success: false };
+      }
     } catch (error) {
-      console.error('API Request failed:', error);
-      return { data: [] as any, success: false };
+      console.error(`API Request failed for ${endpoint}:`, error);
+      return { data: [] as unknown as T, success: false };
     }
   }
 
