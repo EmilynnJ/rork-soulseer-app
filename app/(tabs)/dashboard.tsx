@@ -30,9 +30,7 @@ import { trpc } from '@/lib/trpc';
 export default function DashboardScreen() {
   const router = useRouter();
   const { user, isLoading: userLoading, toggleRole, isReaderOnline, toggleOnlineStatus, logout } = useUser();
-  const { isAdmin, user: authUser } = useAuth();
-
-  console.log('[Dashboard] Rendering - authUser:', authUser?.email, 'role:', authUser?.role, 'isAdmin:', isAdmin);
+  const { isAdmin } = useAuth();
 
   const { data: readerEarnings } = useQuery({
     queryKey: ['reader', 'earnings', user?.id],
