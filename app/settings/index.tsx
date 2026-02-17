@@ -86,7 +86,7 @@ export default function SettingsScreen() {
 
   const handleLogout = async () => {
     await logout();
-    router.replace('/auth/login' as never);
+    router.replace('/auth/login' as any);
   };
 
   return (
@@ -173,12 +173,12 @@ export default function SettingsScreen() {
           <SettingItem
             icon={<HelpCircle size={20} color={Colors.dark.tint} />}
             label="Help Center"
-            onPress={() => router.push('/help' as never)}
+            onPress={() => router.push('/help' as any)}
           />
           <SettingItem
             icon={<FileText size={20} color={Colors.dark.tint} />}
             label="Terms & Privacy"
-            onPress={() => router.push('/policies' as never)}
+            onPress={() => router.push('/policies' as any)}
           />
         </View>
 
@@ -197,7 +197,7 @@ export default function SettingsScreen() {
             <SettingItem
               icon={<LogOut size={20} color={Colors.dark.tint} />}
               label="Sign In"
-              onPress={() => router.push('/auth/login' as never)}
+              onPress={() => router.push('/auth/login' as any)}
               showArrow={false}
             />
           </View>

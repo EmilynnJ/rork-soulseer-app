@@ -31,7 +31,7 @@ export const Header: React.FC<HeaderProps> = ({
     ]}>
       <View style={styles.leftContainer}>
         {showMenu && (
-          <TouchableOpacity onPress={() => router.push('/menu' as never)} style={styles.iconButton}>
+          <TouchableOpacity onPress={() => router.push('/menu' as any)} style={styles.iconButton}>
             <Menu color={Colors.dark.text} size={24} />
           </TouchableOpacity>
         )}
@@ -43,7 +43,7 @@ export const Header: React.FC<HeaderProps> = ({
 
       <View style={styles.rightContainer}>
         {showShop && (
-          <TouchableOpacity onPress={() => router.push('/shop' as never)} style={styles.iconButton}>
+          <TouchableOpacity onPress={() => router.push('/shop' as any)} style={styles.iconButton}>
             <ShoppingBag color={Colors.dark.text} size={24} />
           </TouchableOpacity>
         )}

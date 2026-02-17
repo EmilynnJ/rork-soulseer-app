@@ -57,7 +57,12 @@ class ApiService {
 
       if (!response.ok) {
         console.error(`API Error ${response.status} for ${endpoint}:`, text.substring(0, 200));
-        return { data: [] as unknown as T, success: false };
+        try {
+          const errorData = JSON.parse(text);
+          return { data: [] as unknown as T, success: false, error: errorData.error || `Request failed with status ${response.status}` };
+        } catch {
+          return { data: [] as unknown as T, success: false, error: `Request failed with status ${response.status}` };
+        }
       }
 
       try {

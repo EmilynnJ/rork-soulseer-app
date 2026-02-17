@@ -72,7 +72,7 @@ export default function ReaderProfileScreen() {
 
   const startReading = (type: 'chat' | 'call' | 'video') => {
     console.log(`Starting ${type} reading with reader ${id}`);
-    router.push(`/reading/${id}` as never);
+    router.push(`/reading/${id}` as any);
   };
 
   return (

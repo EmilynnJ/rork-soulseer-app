@@ -179,11 +179,11 @@ export default function SignupScreen() {
               </View>
               <Text style={styles.checkboxText}>
                 I agree to the{' '}
-                <Text style={styles.linkText} onPress={() => router.push('/policies' as never)}>
+                <Text style={styles.linkText} onPress={() => router.push('/policies' as any)}>
                   Terms of Service
                 </Text>
                 {' '}and{' '}
-                <Text style={styles.linkText} onPress={() => router.push('/policies' as never)}>
+                <Text style={styles.linkText} onPress={() => router.push('/policies' as any)}>
                   Privacy Policy
                 </Text>
               </Text>
@@ -213,7 +213,7 @@ export default function SignupScreen() {
 
             <View style={styles.loginContainer}>
               <Text style={styles.loginText}>Already have an account? </Text>
-              <TouchableOpacity onPress={() => router.push('/auth/login' as never)}>
+              <TouchableOpacity onPress={() => router.push('/auth/login' as any)}>
                 <Text style={styles.loginLink}>Sign In</Text>
               </TouchableOpacity>
             </View>
