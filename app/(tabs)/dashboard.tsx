@@ -4,6 +4,7 @@ import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { Header } from '@/components/Header';
 import { Colors } from '@/constants/colors';
+import { LinearGradient } from 'expo-linear-gradient';
 import { 
   CreditCard, 
   Calendar, 
@@ -19,18 +20,24 @@ import {
   User as UserIcon,
   RefreshCw,
   Plus,
-  Edit
+  Edit,
+  ArrowRight,
+  Sparkles
 } from 'lucide-react-native';
 import { useUser } from '@/context/UserContext';
 import { useAuth } from '@/context/AuthContext';
 import { useQuery } from '@tanstack/react-query';
 import { apiService } from '@/services/api';
 import { trpc } from '@/lib/trpc';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+const BACKGROUND_IMAGE = 'https://i.postimg.cc/sXdsKGTK/DALL-E-2025-06-06-14-36-29-A-vivid-ethereal-background-image-designed-for-a-psychic-reading-app.webp';
 
 export default function DashboardScreen() {
   const router = useRouter();
   const { user, isLoading: userLoading, toggleRole, isReaderOnline, toggleOnlineStatus, logout } = useUser();
-  const { isAdmin } = useAuth();
+  const { isAdmin, isAuthenticated, isInitialized } = useAuth();
+  const insets = useSafeAreaInsets();
 
   const { data: readerEarnings } = useQuery({
     queryKey: ['reader', 'earnings', user?.id],
@@ -38,13 +45,53 @@ export default function DashboardScreen() {
     enabled: !!user && user.role === 'reader',
   });
 
-  if (userLoading || !user) {
+  if (!isInitialized || (isAuthenticated && userLoading)) {
     return (
       <View style={styles.container}>
         <Header title="Dashboard" showShop={true} />
         <View style={styles.centerContainer}>
           <ActivityIndicator size="large" color={Colors.dark.tint} />
           <Text style={styles.loadingText}>Loading your profile...</Text>
+        </View>
+      </View>
+    );
+  }
+
+  if (!isAuthenticated || !user) {
+    return (
+      <View style={styles.container}>
+        <Image
+          source={{ uri: BACKGROUND_IMAGE }}
+          style={StyleSheet.absoluteFill}
+          contentFit="cover"
+        />
+        <View style={styles.authOverlay} />
+        <View style={[styles.authContainer, { paddingTop: insets.top + 60 }]}>
+          <Sparkles size={48} color={Colors.dark.tint} />
+          <Text style={styles.authTitle}>Welcome to SoulSeer</Text>
+          <Text style={styles.authSubtitle}>Sign in to access your dashboard, manage readings, and connect with our community</Text>
+          
+          <TouchableOpacity
+            style={styles.authLoginButton}
+            onPress={() => router.push('/auth/login' as any)}
+          >
+            <LinearGradient
+              colors={[Colors.dark.tint, '#D84A8C']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.authLoginGradient}
+            >
+              <Text style={styles.authLoginText}>Sign In</Text>
+              <ArrowRight size={20} color="white" />
+            </LinearGradient>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.authSignupButton}
+            onPress={() => router.push('/auth/signup' as any)}
+          >
+            <Text style={styles.authSignupText}>Create an Account</Text>
+          </TouchableOpacity>
         </View>
       </View>
     );
@@ -592,5 +639,62 @@ const styles = StyleSheet.create({
   },
   adminRoleBadge: {
     backgroundColor: 'rgba(138, 43, 226, 0.3)',
+  },
+  authOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(13, 13, 21, 0.92)',
+  },
+  authContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 32,
+  },
+  authTitle: {
+    fontFamily: 'AlexBrush_400Regular',
+    fontSize: 44,
+    color: Colors.dark.tint,
+    marginTop: 20,
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  authSubtitle: {
+    color: 'rgba(255,255,255,0.6)',
+    fontSize: 16,
+    textAlign: 'center',
+    lineHeight: 24,
+    marginBottom: 40,
+    fontFamily: 'PlayfairDisplay_400Regular',
+  },
+  authLoginButton: {
+    width: '100%',
+    borderRadius: 14,
+    overflow: 'hidden',
+    marginBottom: 16,
+  },
+  authLoginGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 16,
+    gap: 8,
+  },
+  authLoginText: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: 'bold' as const,
+  },
+  authSignupButton: {
+    width: '100%',
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.2)',
+    paddingVertical: 16,
+    alignItems: 'center',
+  },
+  authSignupText: {
+    color: 'rgba(255,255,255,0.8)',
+    fontSize: 16,
+    fontWeight: '600' as const,
   },
 });

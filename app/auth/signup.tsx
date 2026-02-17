@@ -56,9 +56,14 @@ export default function SignupScreen() {
     setError('');
     
     try {
-      await register(email.trim(), password, name.trim());
-      console.log('Signup successful for:', email);
-      router.replace('/(tabs)');
+      const data = await register(email.trim(), password, name.trim());
+      console.log('Signup successful for:', email, 'role:', data.user.role);
+      
+      if (data.user.role === 'admin' || data.user.role === 'reader') {
+        router.replace('/(tabs)/dashboard' as any);
+      } else {
+        router.replace('/(tabs)');
+      }
     } catch (err) {
       console.error('Signup error:', err);
       setError(err instanceof Error ? err.message : 'Failed to create account');
