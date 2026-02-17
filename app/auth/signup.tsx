@@ -60,7 +60,7 @@ export default function SignupScreen() {
       console.log('Signup successful for:', email, 'role:', data.user.role);
       
       if (data.user.role === 'admin' || data.user.role === 'reader') {
-        router.replace('/(tabs)/dashboard' as any);
+        router.replace('/(tabs)/dashboard' as never);
       } else {
         router.replace('/(tabs)');
       }
@@ -179,11 +179,11 @@ export default function SignupScreen() {
               </View>
               <Text style={styles.checkboxText}>
                 I agree to the{' '}
-                <Text style={styles.linkText} onPress={() => router.push('/policies' as any)}>
+                <Text style={styles.linkText} onPress={() => router.push('/policies' as never)}>
                   Terms of Service
                 </Text>
                 {' '}and{' '}
-                <Text style={styles.linkText} onPress={() => router.push('/policies' as any)}>
+                <Text style={styles.linkText} onPress={() => router.push('/policies' as never)}>
                   Privacy Policy
                 </Text>
               </Text>
@@ -213,7 +213,7 @@ export default function SignupScreen() {
 
             <View style={styles.loginContainer}>
               <Text style={styles.loginText}>Already have an account? </Text>
-              <TouchableOpacity onPress={() => router.push('/auth/login' as any)}>
+              <TouchableOpacity onPress={() => router.push('/auth/login' as never)}>
                 <Text style={styles.loginLink}>Sign In</Text>
               </TouchableOpacity>
             </View>

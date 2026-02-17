@@ -112,7 +112,7 @@ export default function ChatScreen() {
           <ArrowLeft size={24} color="white" />
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.profileInfo} onPress={() => router.push(`/reader/${id}` as any)}>
+        <TouchableOpacity style={styles.profileInfo} onPress={() => router.push(`/reader/${id}` as never)}>
           <Image source={{ uri: MOCK_READER.avatar }} style={styles.headerAvatar} />
           <View>
             <Text style={styles.headerName}>{MOCK_READER.name}</Text>

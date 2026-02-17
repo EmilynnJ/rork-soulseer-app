@@ -42,7 +42,7 @@ export default function LoginScreen() {
       console.log('Login successful for:', email, 'role:', data.user.role);
       
       if (data.user.role === 'admin' || data.user.role === 'reader') {
-        router.replace('/(tabs)/dashboard' as any);
+        router.replace('/(tabs)/dashboard' as never);
       } else {
         router.replace('/(tabs)');
       }
@@ -167,7 +167,7 @@ export default function LoginScreen() {
 
             <View style={styles.signupContainer}>
               <Text style={styles.signupText}>Don&apos;t have an account? </Text>
-              <TouchableOpacity onPress={() => router.push('/auth/signup' as any)}>
+              <TouchableOpacity onPress={() => router.push('/auth/signup' as never)}>
                 <Text style={styles.signupLink}>Sign Up</Text>
               </TouchableOpacity>
             </View>

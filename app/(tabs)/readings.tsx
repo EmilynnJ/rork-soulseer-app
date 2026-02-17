@@ -34,7 +34,7 @@ export default function ReadingsScreen() {
           <Text style={styles.priceText}>${item.pricePerMin}/min</Text>
           <TouchableOpacity 
             style={styles.chatButton}
-            onPress={() => router.push(`/reading/${item.id}` as any)}
+            onPress={() => router.push(`/reading/${item.id}` as never)}
           >
             <Text style={styles.chatButtonText}>Chat</Text>
           </TouchableOpacity>

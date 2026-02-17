@@ -73,7 +73,7 @@ export default function DashboardScreen() {
           
           <TouchableOpacity
             style={styles.authLoginButton}
-            onPress={() => router.push('/auth/login' as any)}
+            onPress={() => router.push('/auth/login' as never)}
           >
             <LinearGradient
               colors={[Colors.dark.tint, '#D84A8C']}
@@ -88,7 +88,7 @@ export default function DashboardScreen() {
 
           <TouchableOpacity
             style={styles.authSignupButton}
-            onPress={() => router.push('/auth/signup' as any)}
+            onPress={() => router.push('/auth/signup' as never)}
           >
             <Text style={styles.authSignupText}>Create an Account</Text>
           </TouchableOpacity>
@@ -104,7 +104,7 @@ export default function DashboardScreen() {
         <Text style={styles.balanceAmount}>${user.balance.toFixed(2)}</Text>
         <TouchableOpacity 
           style={styles.addFundsButton} 
-          onPress={() => router.push('/wallet/add-funds' as any)}
+          onPress={() => router.push('/wallet/add-funds' as never)}
         >
           <Plus size={16} color={Colors.dark.tint} />
           <Text style={styles.addFundsText}>Add Funds</Text>
@@ -124,7 +124,7 @@ export default function DashboardScreen() {
 
         <TouchableOpacity 
           style={styles.menuItem}
-          onPress={() => router.push('/wallet/transactions' as any)}
+          onPress={() => router.push('/wallet/transactions' as never)}
         >
           <View style={styles.menuItemLeft}>
             <Clock size={20} color={Colors.dark.text} />
@@ -349,7 +349,7 @@ export default function DashboardScreen() {
           
           <TouchableOpacity 
             style={styles.menuItem}
-            onPress={() => router.push('/profile/edit' as any)}
+            onPress={() => router.push('/profile/edit' as never)}
           >
             <View style={styles.menuItemLeft}>
               <Edit size={20} color={Colors.dark.text} />
@@ -360,7 +360,7 @@ export default function DashboardScreen() {
 
           <TouchableOpacity 
             style={styles.menuItem}
-            onPress={() => router.push('/settings' as any)}
+            onPress={() => router.push('/settings' as never)}
           >
             <View style={styles.menuItemLeft}>
               <Settings size={20} color={Colors.dark.text} />
@@ -384,7 +384,7 @@ export default function DashboardScreen() {
             style={styles.menuItem}
             onPress={async () => {
               await logout();
-              router.replace('/auth/login' as any);
+              router.replace('/auth/login' as never);
             }}
           >
             <View style={styles.menuItemLeft}>

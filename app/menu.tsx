@@ -46,9 +46,9 @@ export default function MenuScreen() {
                 if (item.route === '/') {
                   router.push('/(tabs)');
                 } else if (item.isTab) {
-                  router.push(`/(tabs)${item.route}` as any);
+                  router.push(`/(tabs)${item.route}` as never);
                 } else {
-                  router.push(item.route as any);
+                  router.push(item.route as never);
                 }
               }, 100);
             }}
