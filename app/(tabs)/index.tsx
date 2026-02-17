@@ -53,7 +53,7 @@ export default function HomeScreen() {
   const renderStreamItem = ({ item }: { item: LiveStream }) => (
     <TouchableOpacity 
       style={styles.streamItem}
-      onPress={() => router.push('/live')}
+      onPress={() => router.push('/live' as any)}
       activeOpacity={0.8}
     >
       <Image source={{ uri: item.thumbnail }} style={styles.streamThumbnail} contentFit="cover" />
@@ -77,7 +77,7 @@ export default function HomeScreen() {
   const renderOnlineReaderItem = ({ item }: { item: Reader }) => (
     <TouchableOpacity 
       style={styles.onlineReaderCard}
-      onPress={() => router.push(`/reading/${item.id}`)}
+      onPress={() => router.push(`/reading/${item.id}` as any)}
       activeOpacity={0.8}
     >
       <View style={styles.onlineReaderImageContainer}>
@@ -98,7 +98,7 @@ export default function HomeScreen() {
   const renderProductItem = ({ item }: { item: Product }) => (
     <TouchableOpacity 
       style={styles.productCard}
-      onPress={() => router.push('/shop')}
+      onPress={() => router.push('/shop' as any)}
       activeOpacity={0.8}
     >
       <Image source={{ uri: item.image }} style={styles.productImage} contentFit="cover" />
@@ -119,7 +119,7 @@ export default function HomeScreen() {
   const renderCommunityItem = ({ item }: { item: CommunityPost }) => (
     <TouchableOpacity 
       style={styles.communityCard}
-      onPress={() => router.push('/community')}
+      onPress={() => router.push('/community' as any)}
       activeOpacity={0.8}
     >
       <Image source={{ uri: item.image || 'https://images.unsplash.com/photo-1519681393784-d120267933ba?w=800&fit=crop' }} style={styles.communityImage} contentFit="cover" />
@@ -191,29 +191,29 @@ export default function HomeScreen() {
           <QuickActionButton 
             icon={<Eye color={Colors.dark.tint} size={24} />} 
             label="Readers" 
-            onPress={() => router.push('/readings')} 
+            onPress={() => router.push('/readings' as any)} 
           />
           <QuickActionButton 
             icon={<ShoppingBag color={Colors.dark.tint} size={24} />} 
             label="Shop" 
-            onPress={() => router.push('/shop')} 
+            onPress={() => router.push('/shop' as any)} 
           />
           <QuickActionButton 
             icon={<Users color={Colors.dark.tint} size={24} />} 
             label="Community" 
-            onPress={() => router.push('/community')} 
+            onPress={() => router.push('/community' as any)} 
           />
           <QuickActionButton 
             icon={<Mail color={Colors.dark.tint} size={24} />} 
             label="Contact" 
-            onPress={() => router.push('/help')} 
+            onPress={() => router.push('/help' as any)} 
           />
         </View>
 
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Online Readers</Text>
-            <TouchableOpacity onPress={() => router.push('/readings')} style={styles.seeAllButton}>
+            <TouchableOpacity onPress={() => router.push('/readings' as any)} style={styles.seeAllButton}>
               <Text style={styles.seeAllText}>See All</Text>
               <View style={{ width: 4 }} />
               <ArrowRight size={14} color={Colors.dark.tint} />
@@ -239,7 +239,7 @@ export default function HomeScreen() {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Active Live Streams</Text>
-            <TouchableOpacity onPress={() => router.push('/live')} style={styles.seeAllButton}>
+            <TouchableOpacity onPress={() => router.push('/live' as any)} style={styles.seeAllButton}>
               <Text style={styles.seeAllText}>See All</Text>
               <View style={{ width: 4 }} />
               <ArrowRight size={14} color={Colors.dark.tint} />
@@ -265,7 +265,7 @@ export default function HomeScreen() {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Featured Products</Text>
-            <TouchableOpacity onPress={() => router.push('/shop')} style={styles.seeAllButton}>
+            <TouchableOpacity onPress={() => router.push('/shop' as any)} style={styles.seeAllButton}>
               <Text style={styles.seeAllText}>Shop All</Text>
               <View style={{ width: 4 }} />
               <ArrowRight size={14} color={Colors.dark.tint} />
@@ -291,7 +291,7 @@ export default function HomeScreen() {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Community Highlights</Text>
-            <TouchableOpacity onPress={() => router.push('/community')} style={styles.seeAllButton}>
+            <TouchableOpacity onPress={() => router.push('/community' as any)} style={styles.seeAllButton}>
               <Text style={styles.seeAllText}>Join Discussion</Text>
               <View style={{ width: 4 }} />
               <ArrowRight size={14} color={Colors.dark.tint} />
