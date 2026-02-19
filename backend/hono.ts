@@ -1,4 +1,4 @@
-import { trpcServer } from "@hono/trpc-server";
+import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 
@@ -9,13 +9,15 @@ const app = new Hono();
 
 app.use("*", cors());
 
-app.use(
-  "/api/trpc/*",
-  trpcServer({
+app.all("/api/trpc/*", async (c) => {
+  const response = await fetchRequestHandler({
+    endpoint: "/api/trpc",
+    req: c.req.raw,
     router: appRouter,
-    createContext,
-  }),
-);
+    createContext: ({ req }) => createContext({ req }),
+  });
+  return response;
+});
 
 const ADMIN_EMAIL = "emilynnj14@gmail.com";
 const ADMIN_PASSWORD = "Jade2014!";
