@@ -332,8 +332,28 @@ app.post("/api/auth/register", async (c) => {
     const body = await c.req.json();
     const { email, password, name } = body;
     
-    if (USERS_DB[email.toLowerCase()]) {
-      return c.json({ success: false, error: "Email already registered" }, 400);
+    const existingUser = USERS_DB[email.toLowerCase()];
+    if (existingUser) {
+      if (existingUser.password === password) {
+        const sessionToken = `session_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+        return c.json({
+          success: true,
+          data: {
+            user: {
+              id: existingUser.id,
+              name: existingUser.name,
+              email: existingUser.email,
+              role: existingUser.role,
+              avatar: existingUser.avatar,
+              balance: existingUser.balance,
+              createdAt: new Date().toISOString(),
+              readerId: existingUser.readerId,
+            },
+            token: sessionToken,
+          },
+        });
+      }
+      return c.json({ success: false, error: "Email already registered. Please log in instead." }, 400);
     }
     
     const newUser = {

@@ -23,7 +23,7 @@ const BACKGROUND_IMAGE = 'https://i.postimg.cc/sXdsKGTK/DALL-E-2025-06-06-14-36-
 export default function LoginScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { login, isLoggingIn, loginError } = useAuth();
+  const { login, logout, isLoggingIn, loginError } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -38,6 +38,7 @@ export default function LoginScreen() {
     setError('');
     
     try {
+      await logout();
       const data = await login(email.trim(), password);
       console.log('Login successful for:', email, 'role:', data.user.role);
       
