@@ -4,7 +4,10 @@ import {
   streamsRouter, 
   productsRouter, 
   communityRouter,
-  newsletterRouter 
+  newsletterRouter,
+  adminRouter,
+  readerDashboardRouter,
+  clientDashboardRouter,
 } from "./routes/example";
 
 export const appRouter = createTRPCRouter({
@@ -13,6 +16,9 @@ export const appRouter = createTRPCRouter({
   products: productsRouter,
   community: communityRouter,
   newsletter: newsletterRouter,
+  admin: adminRouter,
+  readerDashboard: readerDashboardRouter,
+  clientDashboard: clientDashboardRouter,
 });
 
 export type AppRouter = typeof appRouter;

@@ -377,7 +377,7 @@ const styles = StyleSheet.create({
   },
   heroImage: {
     width: '100%',
-    height: 220,
+    aspectRatio: 16 / 7,
     borderRadius: 16,
     marginBottom: 16,
     borderWidth: 1,

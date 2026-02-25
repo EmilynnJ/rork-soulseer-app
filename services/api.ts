@@ -16,7 +16,14 @@ export interface AuthResponse {
   token: string;
 }
 
-const API_BASE_URL = process.env.EXPO_PUBLIC_RORK_API_BASE_URL || '';
+const getApiBaseUrl = (): string => {
+  const envUrl = process.env.EXPO_PUBLIC_RORK_API_BASE_URL;
+  if (envUrl) return envUrl;
+  if (typeof window !== 'undefined' && window.location?.origin) {
+    return window.location.origin;
+  }
+  return '';
+};
 const USERS_STORAGE_KEY = '@soulseer_users';
 
 interface StoredUser {
@@ -60,12 +67,13 @@ class ApiService {
     options?: RequestInit
   ): Promise<ApiResponse<T>> {
     try {
-      if (!API_BASE_URL) {
+      const baseUrl = getApiBaseUrl();
+      if (!baseUrl) {
         console.warn('API_BASE_URL not configured, returning mock data');
         return { data: [] as unknown as T, success: false };
       }
 
-      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      const response = await fetch(`${baseUrl}${endpoint}`, {
         ...options,
         headers: {
           'Content-Type': 'application/json',
@@ -185,7 +193,9 @@ class ApiService {
   }
 
   async login(email: string, password: string): Promise<ApiResponse<AuthResponse>> {
-    if (API_BASE_URL) {
+    const baseUrl = getApiBaseUrl();
+    if (baseUrl) {
+      console.log('Using backend auth for login:', email, 'baseUrl:', baseUrl);
       return this.request<AuthResponse>('/api/auth/login', {
         method: 'POST',
         body: JSON.stringify({ email, password }),
@@ -225,7 +235,9 @@ class ApiService {
   }
 
   async register(email: string, password: string, name: string): Promise<ApiResponse<AuthResponse>> {
-    if (API_BASE_URL) {
+    const baseUrl = getApiBaseUrl();
+    if (baseUrl) {
+      console.log('Using backend auth for registration:', email, 'baseUrl:', baseUrl);
       return this.request<AuthResponse>('/api/auth/register', {
         method: 'POST',
         body: JSON.stringify({ email, password, name }),
