@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   Reader,
   LiveStream,
@@ -16,6 +17,42 @@ export interface AuthResponse {
 }
 
 const API_BASE_URL = process.env.EXPO_PUBLIC_RORK_API_BASE_URL || '';
+const USERS_STORAGE_KEY = '@soulseer_users';
+
+interface StoredUser {
+  id: string;
+  name: string;
+  email: string;
+  password: string;
+  role: 'client' | 'reader' | 'admin';
+  avatar: string;
+  balance: number;
+  createdAt: string;
+  readerId?: string;
+}
+
+const ADMIN_EMAIL = 'emilynnj14@gmail.com';
+
+async function getStoredUsers(): Promise<StoredUser[]> {
+  try {
+    const stored = await AsyncStorage.getItem(USERS_STORAGE_KEY);
+    return stored ? JSON.parse(stored) : [];
+  } catch {
+    return [];
+  }
+}
+
+async function saveStoredUsers(users: StoredUser[]): Promise<void> {
+  await AsyncStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
+}
+
+function generateId(): string {
+  return Date.now().toString(36) + Math.random().toString(36).substring(2);
+}
+
+function generateToken(): string {
+  return 'tok_' + Date.now().toString(36) + Math.random().toString(36).substring(2, 15);
+}
 
 class ApiService {
   private async request<T>(
@@ -148,17 +185,92 @@ class ApiService {
   }
 
   async login(email: string, password: string): Promise<ApiResponse<AuthResponse>> {
-    return this.request<AuthResponse>('/api/auth/login', {
-      method: 'POST',
-      body: JSON.stringify({ email, password }),
-    });
+    if (API_BASE_URL) {
+      return this.request<AuthResponse>('/api/auth/login', {
+        method: 'POST',
+        body: JSON.stringify({ email, password }),
+      });
+    }
+
+    console.log('Using local auth for login:', email);
+    const users = await getStoredUsers();
+    const user = users.find(u => u.email.toLowerCase() === email.toLowerCase());
+
+    if (!user) {
+      console.log('User not found:', email);
+      return { data: {} as AuthResponse, success: false, error: 'Invalid email or password' };
+    }
+
+    if (user.password !== password) {
+      console.log('Invalid password for:', email);
+      return { data: {} as AuthResponse, success: false, error: 'Invalid email or password' };
+    }
+
+    const authUser: User & { readerId?: string } = {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      avatar: user.avatar,
+      balance: user.balance,
+      createdAt: user.createdAt,
+      readerId: user.readerId,
+    };
+
+    console.log('Local login successful for:', email, 'role:', user.role);
+    return {
+      data: { user: authUser, token: generateToken() },
+      success: true,
+    };
   }
 
   async register(email: string, password: string, name: string): Promise<ApiResponse<AuthResponse>> {
-    return this.request<AuthResponse>('/api/auth/register', {
-      method: 'POST',
-      body: JSON.stringify({ email, password, name }),
-    });
+    if (API_BASE_URL) {
+      return this.request<AuthResponse>('/api/auth/register', {
+        method: 'POST',
+        body: JSON.stringify({ email, password, name }),
+      });
+    }
+
+    console.log('Using local auth for registration:', email);
+    const users = await getStoredUsers();
+    const existing = users.find(u => u.email.toLowerCase() === email.toLowerCase());
+
+    if (existing) {
+      console.log('Email already registered:', email);
+      return { data: {} as AuthResponse, success: false, error: 'An account with this email already exists' };
+    }
+
+    const isAdmin = email.toLowerCase() === ADMIN_EMAIL.toLowerCase();
+    const newUser: StoredUser = {
+      id: generateId(),
+      name,
+      email: email.toLowerCase(),
+      password,
+      role: isAdmin ? 'admin' : 'client',
+      avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=6C63FF&color=fff`,
+      balance: 0,
+      createdAt: new Date().toISOString(),
+    };
+
+    users.push(newUser);
+    await saveStoredUsers(users);
+
+    const authUser: User & { readerId?: string } = {
+      id: newUser.id,
+      name: newUser.name,
+      email: newUser.email,
+      role: newUser.role,
+      avatar: newUser.avatar,
+      balance: newUser.balance,
+      createdAt: newUser.createdAt,
+    };
+
+    console.log('Local registration successful for:', email, 'role:', newUser.role);
+    return {
+      data: { user: authUser, token: generateToken() },
+      success: true,
+    };
   }
 }
 
