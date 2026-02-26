@@ -1,0 +1,13 @@
+name: MiniMax M2.5 OpenRouter MCP Server
+version: 0.0.1
+schema: v1
+mcpServers:
+  - name: MiniMax M2.5 OpenRouter
+    command: npx
+    args:
+      - -y
+      - "modelcontextprotocol/server-openrouter"
+    env:
+      OPENROUTER_API_KEY: "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"
+      OPENROUTER_BASE_URL: https://openrouter.ai/api/v1/models/author/slug/endpoints
+      OPENROUTER_MODEL: "minimax/minimax-m2.5"

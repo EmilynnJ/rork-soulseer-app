@@ -1,13 +1,24 @@
 {
-  "name": "expo-app",
-  "main": "expo-router/entry",
-  "version": "1.0.0",
+  "name": "rork-soulseer-monorepo",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@8.0.0",
   "scripts": {
-    "start": "bunx rork start -p wgrklzkyyig49qmnbsy9a --tunnel",
-    "start-web": "bunx rork start -p wgrklzkyyig49qmnbsy9a --web --tunnel",
-    "start-web-dev": "DEBUG=expo* bunx rork start -p wgrklzkyyig49qmnbsy9a --web --tunnel",
-    "lint": "expo lint"
+    "dev": "turbo run dev --parallel",
+    "build": "turbo run build",
+    "start": "turbo run start",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "clean": "turbo run clean"
   },
+  "devDependencies": {
+    "turbo": "^1.0.0"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ]
+}
   "dependencies": {
     "@expo-google-fonts/alex-brush": "^0.4.1",
     "@expo-google-fonts/playfair-display": "^0.4.2",
