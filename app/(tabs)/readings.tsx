@@ -26,7 +26,7 @@ export default function ReadingsScreen() {
           <View style={styles.ratingRow}>
             <Text style={styles.ratingStar}>★</Text>
             <Text style={styles.ratingText}>
-              {item.rating} ({item.reviews})
+              {item.rating} ({item.reviewCount})
             </Text>
           </View>
         </View>
@@ -34,13 +34,13 @@ export default function ReadingsScreen() {
           <Text style={styles.priceText}>${item.pricePerMin}/min</Text>
           <TouchableOpacity 
             style={styles.chatButton}
-            onPress={() => router.push(`/reading/${item.id}`)}
+            onPress={() => router.push(`/reading/${item.id}` as any)}
           >
             <Text style={styles.chatButtonText}>Chat</Text>
           </TouchableOpacity>
         </View>
       </View>
-      <Text style={styles.description} numberOfLines={2}>{item.description}</Text>
+      <Text style={styles.description} numberOfLines={2}>{item.bio}</Text>
       {item.isOnline && (
         <View style={styles.onlineIndicator} />
       )}

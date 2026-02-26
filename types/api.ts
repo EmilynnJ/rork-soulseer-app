@@ -3,13 +3,17 @@ export interface Reader {
   name: string;
   specialty: string;
   rating: number;
-  reviews: number;
+  reviewCount: number;
   pricePerMin: number;
+  pricePerMinChat?: number;
+  pricePerMinVoice?: number;
+  pricePerMinVideo?: number;
   isOnline: boolean;
   avatar: string;
-  description: string;
   bio?: string;
-  availability?: string[];
+  skills?: string[];
+  languages?: string[];
+  totalReadings?: number;
 }
 
 export interface LiveStream {
@@ -29,6 +33,7 @@ export interface Product {
   price: number;
   image: string;
   rating: number;
+  reviewCount?: number;
   category: string;
   description?: string;
   inStock: boolean;
@@ -37,13 +42,15 @@ export interface Product {
 export interface CommunityPost {
   id: string;
   title: string;
+  content?: string;
   author: string;
-  authorId: string;
+  authorId?: string;
+  authorAvatar?: string;
   comments: number;
   likes: number;
   image?: string;
   createdAt: string;
-  tag: string;
+  tag?: string;
 }
 
 export interface Message {

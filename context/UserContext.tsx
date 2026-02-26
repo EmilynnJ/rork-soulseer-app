@@ -1,17 +1,13 @@
 import createContextHook from '@nkzw/create-context-hook';
 import { useState } from 'react';
 import { apiService } from '@/services/api';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useAuth } from '@/context/AuthContext';
 
 export const [UserContext, useUser] = createContextHook(() => {
   const [isReaderOnline, setIsReaderOnline] = useState(false);
   const queryClient = useQueryClient();
-
-  const { data: user, isLoading, error } = useQuery({
-    queryKey: ['user', 'current'],
-    queryFn: () => apiService.getCurrentUser(),
-    retry: false,
-  });
+  const { user: authUser, isLoading: authLoading, isAuthenticated, logout } = useAuth();
 
   const addFundsMutation = useMutation({
     mutationFn: ({ userId, amount }: { userId: string; amount: number }) => 
@@ -30,14 +26,14 @@ export const [UserContext, useUser] = createContextHook(() => {
   });
 
   const addFunds = (amount: number) => {
-    if (user?.id) {
-      addFundsMutation.mutate({ userId: user.id, amount });
+    if (authUser?.id) {
+      addFundsMutation.mutate({ userId: authUser.id, amount });
     }
   };
 
   const toggleOnlineStatus = () => {
-    if (user?.id && user?.role === 'reader') {
-      toggleStatusMutation.mutate({ readerId: user.id, isOnline: !isReaderOnline });
+    if (authUser?.id && authUser?.role === 'reader') {
+      toggleStatusMutation.mutate({ readerId: authUser.id, isOnline: !isReaderOnline });
     }
   };
 
@@ -46,12 +42,14 @@ export const [UserContext, useUser] = createContextHook(() => {
   };
 
   return {
-    user: user || null,
-    isLoading,
-    error,
+    user: authUser || null,
+    isLoading: authLoading,
+    error: null,
+    isAuthenticated,
     isReaderOnline,
     toggleRole,
     toggleOnlineStatus,
     addFunds,
+    logout,
   };
 });
