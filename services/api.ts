@@ -18,10 +18,17 @@ export interface AuthResponse {
 
 const getApiBaseUrl = (): string => {
   const envUrl = process.env.EXPO_PUBLIC_RORK_API_BASE_URL;
-  if (envUrl) return envUrl;
-  if (typeof window !== 'undefined' && window.location?.origin) {
-    return window.location.origin;
+  if (envUrl && envUrl.trim().length > 0) {
+    return envUrl;
   }
+
+  if (typeof window !== 'undefined' && window.location?.origin) {
+    const origin = window.location.origin;
+    if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
+      return origin;
+    }
+  }
+
   return '';
 };
 const USERS_STORAGE_KEY = '@soulseer_users';
@@ -85,12 +92,12 @@ class ApiService {
       
       if (!text || text.trim().length === 0) {
         console.warn(`API returned empty response for ${endpoint}`);
-        return { data: [] as unknown as T, success: false };
+        return { data: [] as unknown as T, success: false, error: 'API returned empty response' };
       }
 
       if (text.trim().startsWith('<!DOCTYPE') || text.trim().startsWith('<html')) {
         console.warn(`API returned HTML for ${endpoint}, server may be misconfigured`);
-        return { data: [] as unknown as T, success: false };
+        return { data: [] as unknown as T, success: false, error: 'API endpoint is not available on this deployment' };
       }
 
       if (!response.ok) {

@@ -7,13 +7,16 @@ import type { AppRouter } from "@/backend/trpc/app-router";
 export const trpc = createTRPCReact<AppRouter>();
 
 const getBaseUrl = () => {
-  if (typeof window !== 'undefined') {
-    return window.location.origin;
-  }
-  
   const url = process.env.EXPO_PUBLIC_RORK_API_BASE_URL;
-  if (url) {
+  if (url && url.trim().length > 0) {
     return url;
+  }
+
+  if (typeof window !== 'undefined') {
+    const origin = window.location.origin;
+    if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
+      return origin;
+    }
   }
 
   return '';
