@@ -10,6 +10,8 @@ import {
 } from '@expo-google-fonts/playfair-display';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
+import { ClerkProvider } from '@clerk/clerk-expo';
+import { tokenCache } from '@clerk/clerk-expo/token-cache';
 import React, { useEffect, useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -23,6 +25,7 @@ import { trpc, trpcClient } from '@/lib/trpc';
 SplashScreen.preventAutoHideAsync();
 
 const queryClient = new QueryClient();
+const clerkPublishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY ?? '';
 
 function RootLayoutNav() {
   return (
@@ -83,18 +86,20 @@ export default function RootLayout() {
 
   return (
     <ErrorBoundary>
-      <trpc.Provider client={trpcClient} queryClient={queryClient}>
-        <QueryClientProvider client={queryClient}>
-          <AuthProvider>
-            <UserContext>
-            <GestureHandlerRootView style={{ flex: 1 }}>
-              <StatusBar style="light" />
-              <RootLayoutNav />
-            </GestureHandlerRootView>
-          </UserContext>
+      <ClerkProvider publishableKey={clerkPublishableKey} tokenCache={tokenCache}>
+        <trpc.Provider client={trpcClient} queryClient={queryClient}>
+          <QueryClientProvider client={queryClient}>
+            <AuthProvider>
+              <UserContext>
+                <GestureHandlerRootView style={{ flex: 1 }}>
+                  <StatusBar style="light" />
+                  <RootLayoutNav />
+                </GestureHandlerRootView>
+              </UserContext>
             </AuthProvider>
-        </QueryClientProvider>
-      </trpc.Provider>
+          </QueryClientProvider>
+        </trpc.Provider>
+      </ClerkProvider>
     </ErrorBoundary>
   );
 }

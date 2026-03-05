@@ -9,6 +9,7 @@
     "lint": "expo lint"
   },
   "dependencies": {
+    "@clerk/clerk-expo": "^2.19.30",
     "@expo-google-fonts/alex-brush": "^0.4.1",
     "@expo-google-fonts/playfair-display": "^0.4.2",
     "@expo/vector-icons": "^15.0.3",
@@ -33,6 +34,7 @@
     "expo-linking": "~8.0.9",
     "expo-location": "~19.0.7",
     "expo-router": "~6.0.15",
+    "expo-secure-store": "~15.0.8",
     "expo-splash-screen": "~31.0.11",
     "expo-status-bar": "~3.0.8",
     "expo-symbols": "~1.0.7",

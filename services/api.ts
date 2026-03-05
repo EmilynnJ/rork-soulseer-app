@@ -33,6 +33,12 @@ const getApiBaseUrl = (): string => {
 };
 const USERS_STORAGE_KEY = '@soulseer_users';
 
+let apiAuthTokenProvider: (() => Promise<string | null>) | null = null;
+
+export const setApiAuthTokenProvider = (provider: (() => Promise<string | null>) | null): void => {
+  apiAuthTokenProvider = provider;
+};
+
 interface StoredUser {
   id: string;
   name: string;
@@ -80,10 +86,13 @@ class ApiService {
         return { data: [] as unknown as T, success: false };
       }
 
+      const authToken = apiAuthTokenProvider ? await apiAuthTokenProvider() : null;
+
       const response = await fetch(`${baseUrl}${endpoint}`, {
         ...options,
         headers: {
           'Content-Type': 'application/json',
+          ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
           ...options?.headers,
         },
       });
